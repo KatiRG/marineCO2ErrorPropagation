@@ -6,8 +6,11 @@ palette(c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
 library(shiny)
 
 ui <- fluidPage(
-  actionButton(inputId = "clicks",
-    label='Click me'),
+  actionButton(inputId = "norm",
+    label='Normal'),
+
+  actionButton(inputId = "unif",
+    label='Uniform'),
 
   sliderInput(inputId = "num",
     label = "Choose a number",
@@ -25,22 +28,25 @@ ui <- fluidPage(
 
 server <- function(input, output) {
 
-  # reactive expression
-  data <- reactive({
-    rnorm( input$num )
-  })
+  # # reactive expression
+  # data <- reactive({
+  #   rnorm( input$num )
+  # })
+
+  rv <- reactiveValues(data = rnorm( 100 ))
+
+  observeEvent(input$norm, { rv$data <- rnorm( 100 ) })
+  observeEvent(input$unif, { rv$data <- runif( 100 ) })
 
   output$hist <- renderPlot({
-    hist( data(), main = input$title )
+    hist( rv$data, main = input$title )
   })
 
   output$stats <- renderPrint({
-    summary( data() )
+    summary( rv$data )
   })
 
-  observeEvent(input$clicks, {
-    print(as.numeric( input$clicks )) #prints to console
-  })
+
 
 
 }
