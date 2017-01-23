@@ -6,6 +6,9 @@ palette(c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
 library(shiny)
 
 ui <- fluidPage(
+  actionButton(inputId = "clicks",
+    label='Click me'),
+
   sliderInput(inputId = "num",
     label = "Choose a number",
     value = 25, min = 1, max = 100),
@@ -33,6 +36,10 @@ server <- function(input, output) {
 
   output$stats <- renderPrint({
     summary( data() )
+  })
+
+  observeEvent(input$clicks, {
+    print(as.numeric( input$clicks )) #prints to console
   })
 
 
