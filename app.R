@@ -6,22 +6,45 @@ palette(c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
 library(shiny)
 
 ui <- fluidPage(
+
+  fluidRow(
+    column(5, h1("Interactive Error-space Diagram"))
+    ),
+
+  tags$a(href= "http://www.github.com/KatiRG", "KatiRG"),
+  tags$br(),
+  tags$br(),
+
+  tags$p("This is a ", 
+    tags$strong("demo"),
+    "app."
+    ),
+
   actionButton(inputId = "norm",
     label='Normal'),
 
   actionButton(inputId = "unif",
     label='Uniform'),
 
-  sliderInput(inputId = "num",
-    label = "Choose a number",
-    value = 25, min = 1, max = 100),
+  fluidRow(
+    column(3, 
+      sliderInput(inputId = "num",
+        label = "Choose a number",
+        value = 25, min = 1, max = 100)
+      ),
+    column(3,
+      textInput(inputId = "title",
+        label = "Write a title",
+        value = "Histogram of Random Normal Values"
+      )
+    )
+  ),
 
-  textInput(inputId = "title",
-    label = "Write a title",
-    value = "Histogram of Random Normal Values"
-    ),
+  
 
-  plotOutput("hist"),
+  fluidRow(
+    column(5, plotOutput("hist") )
+  ),
 
   verbatimTextOutput("stats")
 )
