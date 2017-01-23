@@ -1,0 +1,11 @@
+Notes
+=====
+
+Install shiny:
+--------------
+open an R session, connect to the internet, and run. > install.packages("shiny")
+
+Run app.R:
+----------
+https://shiny.rstudio.com/articles/running.html
+$ R -e "shiny::runApp('app.R')"
