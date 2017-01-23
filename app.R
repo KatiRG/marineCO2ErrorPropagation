@@ -15,18 +15,26 @@ ui <- fluidPage(
     value = "Histogram of Random Normal Values"
     ),
 
-  plotOutput("hist")
+  plotOutput("hist"),
+
+  verbatimTextOutput("stats")
 )
 
 server <- function(input, output) {
 
+  # reactive expression
+  data <- reactive({
+    rnorm( input$num )
+  })
+
   output$hist <- renderPlot({
-    hist( rnorm(input$num), main = input$title )
-    })
+    hist( data(), main = input$title )
+  })
 
-  
+  output$stats <- renderPrint({
+    summary( data() )
+  })
 
- 
 
 }
 
