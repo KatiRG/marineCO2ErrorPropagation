@@ -38,11 +38,28 @@ ui <- fluidPage(
   ),
 
   textOutput("result"),
+  tags$br(),
+
+  fluidRow(
+    column(1,
+      textInput(inputId = "var1",
+        label = "Value for var1",
+        value = 0.002295
+      )
+    )
+  ),
+
+  sliderInput(inputId = "evar1",
+    label = "Max error in first var (must be > 0):",
+    value = 0, min = 0, max = 20),
+
+  fluidRow(
+    column( 5, plotOutput("erspace", width = "400px", height = "400px") )
+  ),
 
   sliderInput(inputId = "num",
     label = "Choose a number",
     value = 25, min = 1, max = 100),
-
 
   fluidRow(
     column( 5, plotOutput("hist", width = "400px", height = "400px") )
@@ -50,16 +67,12 @@ ui <- fluidPage(
 
   fluidRow(
     column( 5, verbatimTextOutput("stats") )
-  ),
-
-  fluidRow(
-    column( 5, plotOutput("erspace", width = "400px", height = "400px") )
   )
 )
 
 server <- function(input, output) {
   output$result <- renderText({
-    paste("You chose", input$flag)
+    paste("flag value:", input$flag)
   })
 
   # ===================================================================
@@ -69,36 +82,7 @@ server <- function(input, output) {
   source("/homel/cnangini/PROJECTS/seacarb-git/R/errors.R")
   source("/homel/cnangini/PROJECTS/seacarb-git/R/derivnum.R")
 
-  # ===================================================================
-  # Define input vars and their uncertainties
-  # Specify flag & corresponding 2 input variables
 
-  # Input variables:
-  # ----------------
-  # Approximate regional mean for Southern Ocean (c.f. Fig. 3.2 [Orr, 2011])
-  # For ALK & DIC input pair
-  ALK  = 2295e-6  #(umol/kg)
-  DIC  = 2155e-6
-
-  temp = -0.49    #C
-  salt = 33.96    #psu
-  press = 0       #bar
-
-  Phos = 2.e-6    #(umol/kg)
-  Sil = 60.e-6    #(umol/kg)
-
-  # Uncertainties in input variables
-  # ---------------------------------
-  ALK_e <- seq(0., 20., 1.0) * 1e-6
-  DIC_e <- ALK_e
-  pCO2_e <- seq(0,20,1)
-  pH_e   <- seq(0,0.03,0.0015)
-
-  salt_e = 0.01   
-  temp_e = 0.01   
-
-  Pt_e = 0.1e-6
-  Sit_e = 4.0e-6
 
   # Default uncertainties in equilibrium constants 
   # (pK0, pK1, pK2, pKb, pKw, pKa, pKc, Bt)
@@ -186,12 +170,44 @@ server <- function(input, output) {
   output$erspace <- renderPlot({
 
     menu_flag <- as.numeric(input$flag)
+    menu_var1 <- as.numeric(input$var1)
+
+    # ===================================================================
+    # Define input vars and their uncertainties
+    # Specify flag & corresponding 2 input variables
+
+    # Input variables:
+    # ----------------
+    # Approximate regional mean for Southern Ocean (c.f. Fig. 3.2 [Orr, 2011])
+    # For ALK & DIC input pair
+    ALK  = 2295e-6  #(umol/kg)
+    DIC  = 2155e-6
+
+    temp = -0.49    #C
+    salt = 33.96    #psu
+    press = 0       #bar
+
+    Phos = 2.e-6    #(umol/kg)
+    Sil = 60.e-6    #(umol/kg)
+
+    # Uncertainties in input variables
+    # ---------------------------------
+    ALK_e <- seq(0., 20., 1.0) * 1e-6
+    DIC_e <- ALK_e
+    pCO2_e <- seq(0,20,1)
+    pH_e   <- seq(0,0.03,0.0015)
+
+    salt_e = 0.01   
+    temp_e = 0.01   
+
+    Pt_e = 0.1e-6
+    Sit_e = 4.0e-6
 
     # ===================================================================
     # Compute derived carbonate system vars with  seacarb routine carb
     # (Southern Ocean)
     print("Running carb function:")
-    vars <- carb  (flag=menu_flag, var1=ALK, DIC, S=salt, T=temp, Patm=1, P=press, Pt=Phos, Sit=Sil, 
+    vars <- carb  (flag=menu_flag, var1=menu_var1, DIC, S=salt, T=temp, Patm=1, P=press, Pt=Phos, Sit=Sil, 
                         k1k2='w14', kf='dg', ks="d", pHscale="T", 
                         b="u74", gas="potential", warn='n')
 
@@ -232,7 +248,7 @@ server <- function(input, output) {
 
     print("Running carb function again:")
 
-    vars <- carb (flag=menu_flag, var1=ALK, var2=DIC, S=salt, T=temp, 
+    vars <- carb (flag=menu_flag, var1=menu_var1, var2=DIC, S=salt, T=temp, 
                   Patm=1, P=press, Pt=Phos, Sit=Sil, 
                   k1k2='w14', kf='dg', ks="d", pHscale="T", 
                   b="u74", gas="potential", warn='n')
@@ -245,7 +261,7 @@ server <- function(input, output) {
     print("Calculating absEt and absEk:")
 
     # Absolute errors: propagated uncertainties
-    absEt <- errors (flag=menu_flag, var1=ALK, var2=DIC, S=salt, T=temp,
+    absEt <- errors (flag=menu_flag, var1=menu_var1, var2=DIC, S=salt, T=temp,
                     Patm=1, P=press, Pt=Phos, Sit=Sil, 
                     evar1=dat$Var2, evar2=dat$Var1, 
                     eS=0, eT=0, ePt=0, eSit=0, epK=epKstd,
@@ -253,7 +269,7 @@ server <- function(input, output) {
                     b="u74", gas="potential", warn='no')
 
     # Aboslute error from constants only (all other input errors assumed to be zero)
-    absEk <- errors  (flag=menu_flag, var1=ALK, var2=DIC, S=salt, T=temp, 
+    absEk <- errors  (flag=menu_flag, var1=menu_var1, var2=DIC, S=salt, T=temp, 
                      Patm=1, P=press, Pt=Phos, Sit=Sil, 
                      evar1=0, evar2=0, 
                      eS=0, eT=0, ePt=0, eSit=0, epK=epKstd,
@@ -304,7 +320,7 @@ server <- function(input, output) {
     # Constants-pair CURVE (propagated error from constants = that from input pair)
     # (Southern Ocean)
     print("Calculating constants-pair curve (errhalf fn):")
-    errcirc <- errhalf(flag=menu_flag, var1=ALK, var2=DIC, S=salt, T=temp, 
+    errcirc <- errhalf(flag=menu_flag, var1=menu_var1, var2=DIC, S=salt, T=temp, 
                        Patm=1, P=press, Pt=Phos, Sit=Sil,
                        epK=epKstd,
                        k1k2='l', kf='dg', ks="d", pHscale="T", 
@@ -320,7 +336,7 @@ server <- function(input, output) {
     # At-Ct pair (Southern Ocean)
     print("Calculating balanced-pair line (errmid fn):")
     sigyspct <- seq(0,20,by=0.1) # in percent
-    errm <- errmid(flag=menu_flag, var1=ALK, var2=DIC, S=salt, T=temp,
+    errm <- errmid(flag=menu_flag, var1=menu_var1, var2=DIC, S=salt, T=temp,
                   Patm=1, P=press, Pt=Phos, Sit=Sil,
                   sigyspct, epK=epKstd,
                   k1k2='l', kf='dg', ks="d", pHscale="T", 
