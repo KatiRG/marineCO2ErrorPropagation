@@ -69,21 +69,8 @@ ui <- fluidPage(
 
     mainPanel(
       fluidRow(
-        column( 5, plotOutput("erspace", width = "400px", height = "400px") )
-      ),
-
-      sliderInput(inputId = "num",
-        label = "Choose a number",
-        value = 25, min = 1, max = 100),
-
-      fluidRow(
-        column( 5, plotOutput("hist", width = "400px", height = "400px") )
-      ),
-
-      fluidRow(
-        column( 5, verbatimTextOutput("stats") )
+        column( 5, plotOutput("erspace", width = "500px", height = "500px") )
       )
-
       
     ) #./mainPanel
 
@@ -174,21 +161,6 @@ server <- function(input, output) {
     done <- c('error contour plot')
   
   }
-
-  # ---------------------------------------------------------------------
-  # reactive expression
-  data <- reactive({
-    rnorm( input$num )
-  })
-
-  output$hist <- renderPlot({
-    hist( data(), main = input$title )
-  })
-
-  # ---------------------------------------------------------------------
-  output$stats <- renderPrint({
-    summary( data() )
-  })
 
   # ---------------------------------------------------------------------
   # Calculate and render plot based on user selections
