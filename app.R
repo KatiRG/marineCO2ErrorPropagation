@@ -15,68 +15,87 @@ ui <- fluidPage(
               evar1=0, evar2=0, eS=0.01, eT=0.01, ePt=0, eSit=0, 
               epK=c(0.002, 0.01, 0.02, 0.01, 0.01, 0.02, 0.02)'),
 
-  selectInput(inputId="flag", label="Pair of carbonate system input variables", 
-    c("ALK and DIC" = 15,
-      "pH and CO2" = 1,
-      "CO2 and HCO3" = 2,
-      "CO2 and CO3" = 3,
-      "CO2 and ALK" = 4,
-      "CO2 and DIC" = 5,
-      "pH and HCO3" = 6,
-      "pH and CO3" = 7,
-      "pH and ALK" = 8,
-      "pH and DIC" = 9,
-      "HCO3 and CO3" = 10,
-      "HCO3 and ALK" = 11,
-      "HCO3 and DIC" = 12,
-      "CO3 and ALK" = 13,
-      "CO3 and DIC" = 14,
-      "pCO2 and pH" = 21,
-      "pCO2 and HCO3" = 22,
-      "pCO2 and CO3" = 23,
-      "pCO2 and ALK" = 24,
-      "pCO2 and DIC" = 25
-    ),
-    selected = "ALK and DIC", multiple = FALSE,
-    selectize = TRUE, width = NULL, size = NULL
-  ),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput(inputId="flag", label="Pair of carbonate system input variables", 
+                  c("ALK and DIC" = 15,
+                    "pH and CO2" = 1,
+                    "CO2 and HCO3" = 2,
+                    "CO2 and CO3" = 3,
+                    "CO2 and ALK" = 4,
+                    "CO2 and DIC" = 5,
+                    "pH and HCO3" = 6,
+                    "pH and CO3" = 7,
+                    "pH and ALK" = 8,
+                    "pH and DIC" = 9,
+                    "HCO3 and CO3" = 10,
+                    "HCO3 and ALK" = 11,
+                    "HCO3 and DIC" = 12,
+                    "CO3 and ALK" = 13,
+                    "CO3 and DIC" = 14,
+                    "pCO2 and pH" = 21,
+                    "pCO2 and HCO3" = 22,
+                    "pCO2 and CO3" = 23,
+                    "pCO2 and ALK" = 24,
+                    "pCO2 and DIC" = 25
+                  ),
+                  selected = "ALK and DIC", multiple = FALSE,
+                  selectize = TRUE, width = NULL, size = NULL
+      ),
 
-  textOutput("result"),
-  tags$br(),
+      textOutput("result"),
+      tags$br(),
 
-  wellPanel(
-    textInput(inputId = "var1",
-      label = "Value for var1",
-      value = 0.002295
-    ),
+      wellPanel(
+        textInput(inputId = "var1",
+          label = "Value for var1",
+          value = 0.002295
+        ),
 
-    textInput(inputId = "var2",
-      label = "Value for var2",
-      value = 2155e-6
-    )
-    
-  ),
+        textInput(inputId = "var2",
+          label = "Value for var2",
+          value = 2155e-6
+        )
+        
+      ),
 
-  sliderInput(inputId = "evar1",
-    label = "Max error in first var (must be > 0):",
-    value = 0, min = 0, max = 20),
+      sliderInput(inputId = "evar1",
+        label = "Max error in first var (must be > 0):",
+        value = 0, min = 0, max = 20
+      )
 
-  fluidRow(
-    column( 5, plotOutput("erspace", width = "400px", height = "400px") )
-  ),
 
-  sliderInput(inputId = "num",
-    label = "Choose a number",
-    value = 25, min = 1, max = 100),
+    ), #./sidebarPanel
 
-  fluidRow(
-    column( 5, plotOutput("hist", width = "400px", height = "400px") )
-  ),
+    mainPanel(
+      fluidRow(
+        column( 5, plotOutput("erspace", width = "400px", height = "400px") )
+      ),
 
-  fluidRow(
-    column( 5, verbatimTextOutput("stats") )
-  )
-)
+      sliderInput(inputId = "num",
+        label = "Choose a number",
+        value = 25, min = 1, max = 100),
+
+      fluidRow(
+        column( 5, plotOutput("hist", width = "400px", height = "400px") )
+      ),
+
+      fluidRow(
+        column( 5, verbatimTextOutput("stats") )
+      )
+
+      
+    ) #./mainPanel
+
+
+
+  ) #./sidebarLayout
+
+ 
+
+  
+
+) # ./fluidPage
 
 server <- function(input, output) {
   output$result <- renderText({
