@@ -11,13 +11,23 @@ ui <- fluidPage(
   tags$br(),
   tags$br(),
 
+  selectInput(inputId="flag", label="Pair of carbonate system input variables", 
+    c("pH and CO2" = 1,
+      "Transmission" = "am",
+      "Gears" = "gear"), 
+    selected = "pH and CO2", multiple = FALSE,
+    selectize = TRUE, width = NULL, size = NULL
+  ),
+
+  textOutput("result"),
+
   sliderInput(inputId = "num",
     label = "Choose a number",
     value = 25, min = 1, max = 100),
 
 
   fluidRow(
-    column( 5, plotOutput("hist") )
+    column( 5, plotOutput("hist", width = "400px", height = "400px") )
   ),
 
   fluidRow(
@@ -30,6 +40,10 @@ ui <- fluidPage(
 )
 
 server <- function(input, output) {
+  output$result <- renderText({
+    paste("You chose", input$flag)
+  })
+
   source("/homel/cnangini/PROJECTS/seacarb-git/R/errhalf.R")
   source("/homel/cnangini/PROJECTS/seacarb-git/R/errmid.R")
   source("/homel/cnangini/PROJECTS/seacarb-git/R/errors.R")
@@ -288,13 +302,14 @@ server <- function(input, output) {
 
   # xdata.numeric <- c(0.00000000, 0.08982232, 0.44856458, 0.89371531, 1.33206433, 1.76027554, 2.17508999, 2.57335068, 2.95202663, 3.30823587, 3.63926744, 3.94260198, 4.21593095, 4.45717413, 4.66449553, 4.83631730, 4.97133177, 5.06851141, 5.12711661, 5.14591750, 5.14670137)
   # ydata.numeric <- c(4.922858e+00, 4.922109e+00, 4.904125e+00, 4.848069e+00, 4.755116e+00, 4.625974e+00, 4.461625e+00, 4.263320e+00, 4.032570e+00, 3.771128e+00, 3.480987e+00, 3.164352e+00, 2.823636e+00, 2.461429e+00, 2.080490e+00, 1.683717e+00, 1.274130e+00, 8.548454e-01, 4.290554e-01, 8.591573e-02, 3.014381e-16)
-  
+
   # reactive expression
   data <- reactive({
     rnorm( input$num )
   })
 
   output$hist <- renderPlot({
+    print("dropdown menu: ", input$flag)
     hist( data(), main = input$title )
   })
 

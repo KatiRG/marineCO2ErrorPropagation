@@ -9,3 +9,22 @@ Run app.R:
 ----------
 https://shiny.rstudio.com/articles/running.html
 $ R -e "shiny::runApp('app.R')"
+
+rmagic:
+https://ipython.org/ipython-doc/2/config/extensions/rmagic.html
+
+rpy2:
+https://rpy2.bitbucket.io/
+
+Installing R kernel and R packages:
+https://github.com/inbo/lifewatch-jupyterhub/wiki/How-to-install-the-R-kernel-and-R-packages
+
+r-irkernel from anaconda:
+https://anaconda.org/search?q=r-irkernel
+
+seacarb error fn description:
+https://rdrr.io/cran/seacarb/man/errors.html
+
+pull James Orr's functions from github:
+git clone https://github.com/jamesorr/seacarb-git.git
+branch: buffesm1
