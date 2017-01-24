@@ -8,8 +8,12 @@ library(seacarb)
 
 ui <- fluidPage(
   tags$h1("Interactive error-space diagram for the marine CO2 system"),
-  tags$br(),
-  tags$br(),
+
+  tags$p("Implements error function, allowing user to change various input values:"),
+
+  tags$p('errors(flag, var1, var2, S=35, T=25, Patm=1, P=0, Pt=0, Sit=0, 
+              evar1=0, evar2=0, eS=0.01, eT=0.01, ePt=0, eSit=0, 
+              epK=c(0.002, 0.01, 0.02, 0.01, 0.01, 0.02, 0.02)'),
 
   selectInput(inputId="flag", label="Pair of carbonate system input variables", 
     c("ALK and DIC" = 15,
@@ -40,13 +44,17 @@ ui <- fluidPage(
   textOutput("result"),
   tags$br(),
 
-  fluidRow(
-    column(1,
-      textInput(inputId = "var1",
-        label = "Value for var1",
-        value = 0.002295
-      )
+  wellPanel(
+    textInput(inputId = "var1",
+      label = "Value for var1",
+      value = 0.002295
+    ),
+
+    textInput(inputId = "var2",
+      label = "Value for var2",
+      value = 2155e-6
     )
+    
   ),
 
   sliderInput(inputId = "evar1",
@@ -148,8 +156,6 @@ server <- function(input, output) {
   
   }
 
-
-
   # ---------------------------------------------------------------------
   # reactive expression
   data <- reactive({
@@ -171,6 +177,7 @@ server <- function(input, output) {
 
     menu_flag <- as.numeric(input$flag)
     menu_var1 <- as.numeric(input$var1)
+    menu_var2 <- as.numeric(input$var2)
 
     # ===================================================================
     # Define input vars and their uncertainties
@@ -180,7 +187,7 @@ server <- function(input, output) {
     # ----------------
     # Approximate regional mean for Southern Ocean (c.f. Fig. 3.2 [Orr, 2011])
     # For ALK & DIC input pair
-    ALK  = 2295e-6  #(umol/kg)
+    # ALK  = 2295e-6  #(umol/kg)
     DIC  = 2155e-6
 
     temp = -0.49    #C
@@ -207,7 +214,7 @@ server <- function(input, output) {
     # Compute derived carbonate system vars with  seacarb routine carb
     # (Southern Ocean)
     print("Running carb function:")
-    vars <- carb  (flag=menu_flag, var1=menu_var1, DIC, S=salt, T=temp, Patm=1, P=press, Pt=Phos, Sit=Sil, 
+    vars <- carb  (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=salt, T=temp, Patm=1, P=press, Pt=Phos, Sit=Sil, 
                         k1k2='w14', kf='dg', ks="d", pHscale="T", 
                         b="u74", gas="potential", warn='n')
 
@@ -248,7 +255,7 @@ server <- function(input, output) {
 
     print("Running carb function again:")
 
-    vars <- carb (flag=menu_flag, var1=menu_var1, var2=DIC, S=salt, T=temp, 
+    vars <- carb (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=salt, T=temp, 
                   Patm=1, P=press, Pt=Phos, Sit=Sil, 
                   k1k2='w14', kf='dg', ks="d", pHscale="T", 
                   b="u74", gas="potential", warn='n')
@@ -261,7 +268,7 @@ server <- function(input, output) {
     print("Calculating absEt and absEk:")
 
     # Absolute errors: propagated uncertainties
-    absEt <- errors (flag=menu_flag, var1=menu_var1, var2=DIC, S=salt, T=temp,
+    absEt <- errors (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=salt, T=temp,
                     Patm=1, P=press, Pt=Phos, Sit=Sil, 
                     evar1=dat$Var2, evar2=dat$Var1, 
                     eS=0, eT=0, ePt=0, eSit=0, epK=epKstd,
@@ -269,7 +276,7 @@ server <- function(input, output) {
                     b="u74", gas="potential", warn='no')
 
     # Aboslute error from constants only (all other input errors assumed to be zero)
-    absEk <- errors  (flag=menu_flag, var1=menu_var1, var2=DIC, S=salt, T=temp, 
+    absEk <- errors  (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=salt, T=temp, 
                      Patm=1, P=press, Pt=Phos, Sit=Sil, 
                      evar1=0, evar2=0, 
                      eS=0, eT=0, ePt=0, eSit=0, epK=epKstd,
@@ -320,7 +327,7 @@ server <- function(input, output) {
     # Constants-pair CURVE (propagated error from constants = that from input pair)
     # (Southern Ocean)
     print("Calculating constants-pair curve (errhalf fn):")
-    errcirc <- errhalf(flag=menu_flag, var1=menu_var1, var2=DIC, S=salt, T=temp, 
+    errcirc <- errhalf(flag=menu_flag, var1=menu_var1, var2=menu_var2, S=salt, T=temp, 
                        Patm=1, P=press, Pt=Phos, Sit=Sil,
                        epK=epKstd,
                        k1k2='l', kf='dg', ks="d", pHscale="T", 
@@ -336,7 +343,7 @@ server <- function(input, output) {
     # At-Ct pair (Southern Ocean)
     print("Calculating balanced-pair line (errmid fn):")
     sigyspct <- seq(0,20,by=0.1) # in percent
-    errm <- errmid(flag=menu_flag, var1=menu_var1, var2=DIC, S=salt, T=temp,
+    errm <- errmid(flag=menu_flag, var1=menu_var1, var2=menu_var2, S=salt, T=temp,
                   Patm=1, P=press, Pt=Phos, Sit=Sil,
                   sigyspct, epK=epKstd,
                   k1k2='l', kf='dg', ks="d", pHscale="T", 
