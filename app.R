@@ -19,26 +19,26 @@ ui <- fluidPage(
     sidebarPanel(
       # conditional menu to determine output var list given an input pair
       selectInput(inputId="flag", label="Input pair (var1, var2)", 
-                  c("ALK and DIC" = "15",
-                    "pH and CO2" = "1",
+                  c("ALK [umol/kg] and DIC [umol/kg]" = "15",
+                    "pH and CO2 [umol/kg]" = "1",
                     # "CO2 and HCO3" = 2,
                     # "CO2 and CO3" = 3,
                     # "CO2 and ALK" = 4,
                     # "CO2 and DIC" = 5,
                     # "pH and HCO3" = 6,
                     # "pH and CO3" = 7,
-                    "pH and ALK" = "8",
-                    "pH and DIC" = "9",
+                    "pH and ALK [umol/kg]" = "8",
+                    "pH and DIC [umol/kg]" = "9",
                     # "HCO3 and CO3" = 10,
                     # "HCO3 and ALK" = 11,
                     # "HCO3 and DIC" = 12,
                     # "CO3 and ALK" = 13,
                     # "CO3 and DIC" = 14,
-                    "pCO2 and pH" = "21",
+                    "pCO2 [umol/kg] and pH" = "21",
                     # "pCO2 and HCO3" = 22,
                     # "pCO2 and CO3" = 23,
                     # "pCO2 and ALK" = "24", #Error: f() values at end points not of opposite sign
-                    "pCO2 and DIC" = "25"
+                    "pCO2 [umol/kg] and DIC [umol/kg]" = "25"
                   ),
                   selected = "15", multiple = FALSE,
                   selectize = TRUE, width = NULL, size = NULL),
@@ -89,17 +89,18 @@ ui <- fluidPage(
       textOutput("result"),
       tags$br(),
 
+     
       fluidRow(
         column(3, 
           textInput(inputId = "var1",
-            label = "var1 (umol/kg)",
+            label = "var1",
             value = 2295 #pass as umol/kg
           )
         ),
 
         column(3,
           textInput(inputId = "var2",
-            label = "var2 (umol/kg)",
+            label = "var2",
             value = 2155 #pass as umol/kg
           )
         ),
@@ -277,6 +278,8 @@ server <- function(input, output) {
       "25" = as.character(input$outvar_flag25)  #exclude pCO2
     )})
     menu_outvar <- conditional_outvar()
+    print("menu_outvar:")
+    print(menu_outvar)
    
 
     # temp = -0.49    #C
