@@ -17,7 +17,7 @@ ui <- fluidPage(
 
   sidebarLayout(
     sidebarPanel(
-      selectInput(inputId="flag", label="Pair of carbonate system input variables", 
+      selectInput(inputId="flag", label="Input pair (var1, var2)", 
                   c("ALK and DIC" = 15,
                     "pH and CO2" = 1,
                     "CO2 and HCO3" = 2,
@@ -46,23 +46,59 @@ ui <- fluidPage(
       textOutput("result"),
       tags$br(),
 
-      wellPanel(
-        textInput(inputId = "var1",
-          label = "Value for var1",
-          value = 0.002295
+      fluidRow(
+        column(3, 
+          textInput(inputId = "var1",
+            label = "Value for var1 (umol/kg)",
+            value = 2295 #pass as umol/kg
+          )
         ),
 
-        textInput(inputId = "var2",
-          label = "Value for var2",
-          value = 2155e-6
+        column(3,
+          textInput(inputId = "var2",
+            label = "Value for var2 (umol/kg)",
+            value = 2155 #pass as umol/kg
+          )
         )
-        
+      ), #./fluidRow
+
+      sliderInput(inputId = "salt",
+        label = "Salinity (psu):",
+        value = 35.0, min = 0, max = 50, step= 0.1
       ),
 
-      sliderInput(inputId = "evar1",
-        label = "Max error in first var (must be > 0):",
-        value = 0, min = 0, max = 20
-      )
+      sliderInput(inputId = "temp",
+        label = "Temperature (C):",
+        value = -0.49, min = -2, max = 40, step= 0.1
+      ),
+
+      fluidRow(
+        column(3, 
+          textInput(inputId = "pressure",
+            label = "Pressure (dbars):",
+            value = 0 #pass as dbar
+          )
+        ),
+
+        column(4,
+          textInput(inputId = "Pt",
+            label = "[tot dissolved inorg. P] (umol/kg):",
+            value = 2.e-6
+          )
+        ),
+
+        column(4, 
+          textInput(inputId = "sil",
+            label = "[tot dissolved inorg. Si] (umol/kg):",
+            value = 60.e-6
+          )
+        )
+      ) #./fluidRow
+
+      # sliderInput(inputId = "evar1",
+      #   label = "Max error in first var (must be > 0):",
+      #   value = 0, min = 0, max = 20
+      # )
 
 
     ), #./sidebarPanel
@@ -80,7 +116,6 @@ ui <- fluidPage(
 
  
 
-  
 
 ) # ./fluidPage
 
@@ -166,10 +201,6 @@ server <- function(input, output) {
   # Calculate and render plot based on user selections
   output$erspace <- renderPlot({
 
-    menu_flag <- as.numeric(input$flag)
-    menu_var1 <- as.numeric(input$var1)
-    menu_var2 <- as.numeric(input$var2)
-
     # ===================================================================
     # Define input vars and their uncertainties
     # Specify flag & corresponding 2 input variables
@@ -177,16 +208,19 @@ server <- function(input, output) {
     # Input variables:
     # ----------------
     # Approximate regional mean for Southern Ocean (c.f. Fig. 3.2 [Orr, 2011])
-    # For ALK & DIC input pair
-    # ALK  = 2295e-6  #(umol/kg)
-    DIC  = 2155e-6
+    menu_flag <- as.numeric(input$flag)
+    menu_var1 <- as.numeric(input$var1) * 1e-6 #convert umol to mol
+    menu_var2 <- as.numeric(input$var2) * 1e-6 #convert umol to mol
+    menu_salt <- as.numeric(input$salt)
+    menu_temp <- as.numeric(input$temp)
+    menu_pressure <- as.numeric(input$pressure) /10  #convert dbars to bars
 
-    temp = -0.49    #C
-    salt = 33.96    #psu
-    press = 0       #bar
+    # temp = -0.49    #C
+    # salt = 33.96    #psu
+    # press = 0       #bar
 
-    Phos = 2.e-6    #(umol/kg)
-    Sil = 60.e-6    #(umol/kg)
+    Phos = 2.e-6    #(mol/kg)
+    Sil = 60.e-6    #(mol/kg)
 
     # Uncertainties in input variables
     # ---------------------------------
@@ -205,7 +239,7 @@ server <- function(input, output) {
     # Compute derived carbonate system vars with  seacarb routine carb
     # (Southern Ocean)
     print("Running carb function:")
-    vars <- carb  (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=salt, T=temp, Patm=1, P=press, Pt=Phos, Sit=Sil, 
+    vars <- carb  (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp, Patm=1, P=menu_pressure, Pt=Phos, Sit=Sil, 
                         k1k2='w14', kf='dg', ks="d", pHscale="T", 
                         b="u74", gas="potential", warn='n')
 
@@ -246,8 +280,8 @@ server <- function(input, output) {
 
     print("Running carb function again:")
 
-    vars <- carb (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=salt, T=temp, 
-                  Patm=1, P=press, Pt=Phos, Sit=Sil, 
+    vars <- carb (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp, 
+                  Patm=1, P=menu_pressure, Pt=Phos, Sit=Sil, 
                   k1k2='w14', kf='dg', ks="d", pHscale="T", 
                   b="u74", gas="potential", warn='n')
 
@@ -259,16 +293,16 @@ server <- function(input, output) {
     print("Calculating absEt and absEk:")
 
     # Absolute errors: propagated uncertainties
-    absEt <- errors (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=salt, T=temp,
-                    Patm=1, P=press, Pt=Phos, Sit=Sil, 
+    absEt <- errors (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp,
+                    Patm=1, P=menu_pressure, Pt=Phos, Sit=Sil, 
                     evar1=dat$Var2, evar2=dat$Var1, 
                     eS=0, eT=0, ePt=0, eSit=0, epK=epKstd,
                     k1k2='w14', kf='dg', ks="d", pHscale="T",
                     b="u74", gas="potential", warn='no')
 
     # Aboslute error from constants only (all other input errors assumed to be zero)
-    absEk <- errors  (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=salt, T=temp, 
-                     Patm=1, P=press, Pt=Phos, Sit=Sil, 
+    absEk <- errors  (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp, 
+                     Patm=1, P=menu_pressure, Pt=Phos, Sit=Sil, 
                      evar1=0, evar2=0, 
                      eS=0, eT=0, ePt=0, eSit=0, epK=epKstd,
                      k1k2='w14', kf='dg', ks="d", pHscale="T",
@@ -318,8 +352,8 @@ server <- function(input, output) {
     # Constants-pair CURVE (propagated error from constants = that from input pair)
     # (Southern Ocean)
     print("Calculating constants-pair curve (errhalf fn):")
-    errcirc <- errhalf(flag=menu_flag, var1=menu_var1, var2=menu_var2, S=salt, T=temp, 
-                       Patm=1, P=press, Pt=Phos, Sit=Sil,
+    errcirc <- errhalf(flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp, 
+                       Patm=1, P=menu_pressure, Pt=Phos, Sit=Sil,
                        epK=epKstd,
                        k1k2='l', kf='dg', ks="d", pHscale="T", 
                        b="u74", gas="potential", warn="n")  
@@ -334,8 +368,8 @@ server <- function(input, output) {
     # At-Ct pair (Southern Ocean)
     print("Calculating balanced-pair line (errmid fn):")
     sigyspct <- seq(0,20,by=0.1) # in percent
-    errm <- errmid(flag=menu_flag, var1=menu_var1, var2=menu_var2, S=salt, T=temp,
-                  Patm=1, P=press, Pt=Phos, Sit=Sil,
+    errm <- errmid(flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp,
+                  Patm=1, P=menu_pressure, Pt=Phos, Sit=Sil,
                   sigyspct, epK=epKstd,
                   k1k2='l', kf='dg', ks="d", pHscale="T", 
                   b="u74", gas="potential", warn="n")
