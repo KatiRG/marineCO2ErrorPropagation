@@ -17,71 +17,74 @@ ui <- fluidPage(
 
   sidebarLayout(
     sidebarPanel(
-      checkboxInput("smooth", "Smooth"),
-      conditionalPanel(
-        condition = "input.smooth == true",
-        selectInput("smoothMethod", "Method",
-                    list("lm", "glm", "gam", "loess", "rlm"))
-      ),
-
-      # conditional menu
-      selectInput(inputId="invar", label="invar", 
-                  c("A and B" = 15,
-                    "C and D" = 1),
-                  selected = "C and D", multiple = FALSE,
+      # conditional menu to determine output var list given an input pair
+      selectInput(inputId="flag", label="Input pair (var1, var2)", 
+                  c("ALK and DIC" = "15",
+                    "pH and CO2" = "1",
+                    # "CO2 and HCO3" = 2,
+                    # "CO2 and CO3" = 3,
+                    # "CO2 and ALK" = 4,
+                    # "CO2 and DIC" = 5,
+                    # "pH and HCO3" = 6,
+                    # "pH and CO3" = 7,
+                    "pH and ALK" = "8",
+                    "pH and DIC" = "9",
+                    # "HCO3 and CO3" = 10,
+                    # "HCO3 and ALK" = 11,
+                    # "HCO3 and DIC" = 12,
+                    # "CO3 and ALK" = 13,
+                    # "CO3 and DIC" = 14,
+                    "pCO2 and pH" = "21",
+                    # "pCO2 and HCO3" = 22,
+                    # "pCO2 and CO3" = 23,
+                    # "pCO2 and ALK" = "24", #Error: f() values at end points not of opposite sign
+                    "pCO2 and DIC" = "25"
+                  ),
+                  selected = "15", multiple = FALSE,
                   selectize = TRUE, width = NULL, size = NULL),
 
       conditionalPanel(
-        condition = "input.invar == 1",
-        selectInput("pickOutputs_flag1", "Outvar_flag1",
-                    list("a", "b", "c", "d", "e"))
-      ),
-      conditionalPanel(
-        condition = "input.invar == 15",
-        selectInput("pickOutputs_flag15", "Outvar_flag15",
-                    list("asiago", "pecorino"))
-      ),
-
-
-
-      selectInput(inputId="flag", label="Input pair (var1, var2)", 
-                  c("ALK and DIC" = 15,
-                    "pH and CO2" = 1,
-                    "CO2 and HCO3" = 2,
-                    "CO2 and CO3" = 3,
-                    "CO2 and ALK" = 4,
-                    "CO2 and DIC" = 5,
-                    "pH and HCO3" = 6,
-                    "pH and CO3" = 7,
-                    "pH and ALK" = 8,
-                    "pH and DIC" = 9,
-                    "HCO3 and CO3" = 10,
-                    "HCO3 and ALK" = 11,
-                    "HCO3 and DIC" = 12,
-                    "CO3 and ALK" = 13,
-                    "CO3 and DIC" = 14,
-                    "pCO2 and pH" = 21,
-                    "pCO2 and HCO3" = 22,
-                    "pCO2 and CO3" = 23,
-                    "pCO2 and ALK" = 24,
-                    "pCO2 and DIC" = 25
-                  ),
-                  selected = "ALK and DIC", multiple = FALSE,
-                  selectize = TRUE, width = NULL, size = NULL
-      ),
-
-        selectInput(inputId="outvar", label="Output variable", 
+        condition = "input.flag == '1'", #exclude CO2* from list
+        selectInput(inputId="outvar_flag1", label="Output variable", 
                   c("H+" = "H",
                     "pCO2" = "pCO2",
                     "CO3^2-" = "CO3",
-                    "CO2*" = "CO2",                    
-                    "HCO3-" = "HCO3",                    
+                    "HCO3-" = "HCO3",
                     "OmegaCalcite" = "OmegaCalcite",
                     "OmegaArgonite" = "OmegaAragonite"
                   ),
                   selected = "CO3", multiple = FALSE,
-                  selectize = TRUE, width = NULL, size = NULL
+                  selectize = TRUE, width = NULL, size = NULL)
       ),
+      conditionalPanel(         
+        condition = "input.flag == '15' || input.flag == '8' || input.flag == '9'", #show full list
+        selectInput(inputId="outvar_flag15", label="Output variable", 
+                  c("H+" = "H",
+                    "pCO2" = "pCO2",
+                    "CO3^2-" = "CO3",
+                    "CO2*" = "CO2",
+                    "HCO3-" = "HCO3",
+                    "OmegaCalcite" = "OmegaCalcite",
+                    "OmegaArgonite" = "OmegaAragonite"
+                  ),
+                  selected = "CO3", multiple = FALSE,
+                  selectize = TRUE, width = NULL, size = NULL)
+      ),
+     conditionalPanel(
+        condition = "input.flag == '21' || input.flag == '24' || input.flag == '25'", #exclude pCO2 from list
+        selectInput(inputId="outvar_flag25", label="Output variable", 
+                  c("H+" = "H",                    
+                    "CO3^2-" = "CO3",
+                    "CO2*" = "CO2",
+                    "HCO3-" = "HCO3",
+                    "OmegaCalcite" = "OmegaCalcite",
+                    "OmegaArgonite" = "OmegaAragonite"
+                  ),
+                  selected = "CO3", multiple = FALSE,
+                  selectize = TRUE, width = NULL, size = NULL)
+      ),
+      
+                
 
       textOutput("result"),
       tags$br(),
@@ -261,7 +264,20 @@ server <- function(input, output) {
     menu_pressure <- as.numeric(input$pressure) /10  #convert dbars to bars
     menu_phos <- as.numeric(input$phos) * 1e-6 #convert umol/kg to mol/kg
     menu_sil <- as.numeric(input$sil) * 1e-6 #convert umol/kg to mol/kg
-    menu_outvar <- as.character(input$outvar)
+
+    # Define output variable based on conditional menu selection
+    conditional_outvar <- reactive({switch(
+      input$flag,
+      "1" = as.character(input$outvar_flag1),
+      "8" = as.character(input$outvar_flag15),  #full list
+      "9" = as.character(input$outvar_flag15),  #full list
+      "15" = as.character(input$outvar_flag15),  #full list
+      "21" = as.character(input$outvar_flag25),  #exclude pCO2
+      "24" = as.character(input$outvar_flag25),  #exclude pCO2
+      "25" = as.character(input$outvar_flag25)  #exclude pCO2
+    )})
+    menu_outvar <- conditional_outvar()
+   
 
     # temp = -0.49    #C
     # salt = 33.96    #psu

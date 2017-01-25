@@ -28,3 +28,20 @@ https://rdrr.io/cran/seacarb/man/errors.html
 pull James Orr's functions from github:
 git clone https://github.com/jamesorr/seacarb-git.git
 branch: buffesm1
+
+Conditional Panel
+-----------------
+https://shiny.rstudio.com/articles/dynamic-ui.html
+good example:
+http://stackoverflow.com/questions/26430253/using-conditionalpanel-in-shiny-ui-r-and-server-r-different-selectinput-based-o
+
+original list of output vars
+----------------------------
+c("H+" = "H",
+  "pCO2" = "pCO2",
+  "CO3^2-" = "CO3",
+  "CO2*" = "CO2",
+  "HCO3-" = "HCO3",
+  "OmegaCalcite" = "OmegaCalcite",
+  "OmegaArgonite" = "OmegaAragonite"
+),
