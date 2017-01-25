@@ -17,6 +17,33 @@ ui <- fluidPage(
 
   sidebarLayout(
     sidebarPanel(
+      checkboxInput("smooth", "Smooth"),
+      conditionalPanel(
+        condition = "input.smooth == true",
+        selectInput("smoothMethod", "Method",
+                    list("lm", "glm", "gam", "loess", "rlm"))
+      ),
+
+      # conditional menu
+      selectInput(inputId="invar", label="invar", 
+                  c("A and B" = 15,
+                    "C and D" = 1),
+                  selected = "C and D", multiple = FALSE,
+                  selectize = TRUE, width = NULL, size = NULL),
+
+      conditionalPanel(
+        condition = "input.invar == 1",
+        selectInput("pickOutputs_flag1", "Outvar_flag1",
+                    list("a", "b", "c", "d", "e"))
+      ),
+      conditionalPanel(
+        condition = "input.invar == 15",
+        selectInput("pickOutputs_flag15", "Outvar_flag15",
+                    list("asiago", "pecorino"))
+      ),
+
+
+
       selectInput(inputId="flag", label="Input pair (var1, var2)", 
                   c("ALK and DIC" = 15,
                     "pH and CO2" = 1,
@@ -100,14 +127,14 @@ ui <- fluidPage(
 
         column(4,
           textInput(inputId = "phos",
-            label = "[tot dissolved inorg. P] (umol/kg)",
+            label = "[Phosphate] (umol/kg)",
             value = 2  #2.e-6 mol/kg
           )
         ),
 
         column(4, 
           textInput(inputId = "sil",
-            label = "[tot dissolved inorg. Si] (umol/kg)",
+            label = "[Silicon] (umol/kg)",
             value = 60 #60.e-6 mol/kg
           )
         )
@@ -408,7 +435,6 @@ server <- function(input, output) {
 
     # ===================================================================
     # Error-space diagram of relative error in CO3 for At-Ct input pair
-    # dim(rCO3) <- c(length(DIC_e), length(ALK_e))
     dim(er_outvar) <- c(length(DIC_e), length(ALK_e))
     
     subtitle <- NULL
@@ -418,7 +444,7 @@ server <- function(input, output) {
     # sigcritXa <- sig2_AtCt$CO3  ;  sigcritYa <- sig1_AtCt$CO3  #xdata; ydata
     sigcritXa <- sig2_AtCt[[menu_outvar]]  ;  sigcritYa <- sig1_AtCt[[menu_outvar]]  #xdata; ydata
     x <- DIC_e*1e+6  ;  y <- ALK_e*1e+6
-    za <- er_outvar #rCO3
+    za <- er_outvar
     xlim <- c(0,20)  ; ylim <- xlim
     levels1 <- c(1,seq(2,20,by=2))
 
