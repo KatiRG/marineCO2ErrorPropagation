@@ -453,7 +453,7 @@ server <- function(input, output) {
     # Error-space diagram of relative error in CO3 for At-Ct input pair
     dim(er_outvar) <- c(length(DIC_e), length(ALK_e))
     
-    subtitle <- NULL
+    subtitle <-paste("Output variable", menu_outvar, sep=" ")
     xlabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
     ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
 
