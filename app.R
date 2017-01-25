@@ -43,54 +43,72 @@ ui <- fluidPage(
                   selectize = TRUE, width = NULL, size = NULL
       ),
 
+        selectInput(inputId="outvar", label="Output variable", 
+                  c("H+" = "H",
+                    "pCO2" = "pCO2",
+                    "CO3^2-" = "CO3",
+                    "CO2*" = "CO2",                    
+                    "HCO3-" = "HCO3",                    
+                    "OmegaCalcite" = "OmegaCalcite",
+                    "OmegaArgonite" = "OmegaAragonite"
+                  ),
+                  selected = "CO3", multiple = FALSE,
+                  selectize = TRUE, width = NULL, size = NULL
+      ),
+
       textOutput("result"),
       tags$br(),
 
       fluidRow(
         column(3, 
           textInput(inputId = "var1",
-            label = "Value for var1 (umol/kg)",
+            label = "var1 (umol/kg)",
             value = 2295 #pass as umol/kg
           )
         ),
 
         column(3,
           textInput(inputId = "var2",
-            label = "Value for var2 (umol/kg)",
+            label = "var2 (umol/kg)",
             value = 2155 #pass as umol/kg
           )
+        ),
+
+        column(3,
+          textInput(inputId = "salt",
+            label = "Salinity (psu)",
+            value = 35
+          )
+        ),
+
+         column(3,
+          textInput(inputId = "temp",
+            label = "Temperature (C)",
+            value = -0.49
+          )
         )
+
       ), #./fluidRow
-
-      sliderInput(inputId = "salt",
-        label = "Salinity (psu):",
-        value = 35.0, min = 0, max = 50, step= 0.1
-      ),
-
-      sliderInput(inputId = "temp",
-        label = "Temperature (C):",
-        value = -0.49, min = -2, max = 40, step= 0.1
-      ),
 
       fluidRow(
         column(3, 
           textInput(inputId = "pressure",
-            label = "Pressure (dbars):",
+            label = "Pressure (dbars)",
             value = 0 #pass as dbar
           )
         ),
 
         column(4,
-          textInput(inputId = "Pt",
-            label = "[tot dissolved inorg. P] (umol/kg):",
-            value = 2.e-6
+          textInput(inputId = "phos",
+            label = "[tot dissolved inorg. P] (umol/kg)",
+            value = 2  #2.e-6 mol/kg
           )
         ),
 
         column(4, 
           textInput(inputId = "sil",
-            label = "[tot dissolved inorg. Si] (umol/kg):",
-            value = 60.e-6
+            label = "[tot dissolved inorg. Si] (umol/kg)",
+            value = 60 #60.e-6 mol/kg
           )
         )
       ) #./fluidRow
@@ -209,18 +227,20 @@ server <- function(input, output) {
     # ----------------
     # Approximate regional mean for Southern Ocean (c.f. Fig. 3.2 [Orr, 2011])
     menu_flag <- as.numeric(input$flag)
-    menu_var1 <- as.numeric(input$var1) * 1e-6 #convert umol to mol
-    menu_var2 <- as.numeric(input$var2) * 1e-6 #convert umol to mol
+    menu_var1 <- as.numeric(input$var1) * 1e-6 #convert umol/kg to mol/kg
+    menu_var2 <- as.numeric(input$var2) * 1e-6 #convert umol/kg to mol/kg
     menu_salt <- as.numeric(input$salt)
     menu_temp <- as.numeric(input$temp)
     menu_pressure <- as.numeric(input$pressure) /10  #convert dbars to bars
+    menu_phos <- as.numeric(input$phos) * 1e-6 #convert umol/kg to mol/kg
+    menu_sil <- as.numeric(input$sil) * 1e-6 #convert umol/kg to mol/kg
+    menu_outvar <- as.character(input$outvar)
 
     # temp = -0.49    #C
     # salt = 33.96    #psu
     # press = 0       #bar
-
-    Phos = 2.e-6    #(mol/kg)
-    Sil = 60.e-6    #(mol/kg)
+    # Phos = 2.e-6    #(mol/kg)
+    # Sil = 60.e-6    #(mol/kg)
 
     # Uncertainties in input variables
     # ---------------------------------
@@ -239,7 +259,7 @@ server <- function(input, output) {
     # Compute derived carbonate system vars with  seacarb routine carb
     # (Southern Ocean)
     print("Running carb function:")
-    vars <- carb  (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp, Patm=1, P=menu_pressure, Pt=Phos, Sit=Sil, 
+    vars <- carb  (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp, Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil, 
                         k1k2='w14', kf='dg', ks="d", pHscale="T", 
                         b="u74", gas="potential", warn='n')
 
@@ -281,7 +301,7 @@ server <- function(input, output) {
     print("Running carb function again:")
 
     vars <- carb (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp, 
-                  Patm=1, P=menu_pressure, Pt=Phos, Sit=Sil, 
+                  Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil, 
                   k1k2='w14', kf='dg', ks="d", pHscale="T", 
                   b="u74", gas="potential", warn='n')
 
@@ -294,7 +314,7 @@ server <- function(input, output) {
 
     # Absolute errors: propagated uncertainties
     absEt <- errors (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp,
-                    Patm=1, P=menu_pressure, Pt=Phos, Sit=Sil, 
+                    Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil, 
                     evar1=dat$Var2, evar2=dat$Var1, 
                     eS=0, eT=0, ePt=0, eSit=0, epK=epKstd,
                     k1k2='w14', kf='dg', ks="d", pHscale="T",
@@ -302,7 +322,7 @@ server <- function(input, output) {
 
     # Aboslute error from constants only (all other input errors assumed to be zero)
     absEk <- errors  (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp, 
-                     Patm=1, P=menu_pressure, Pt=Phos, Sit=Sil, 
+                     Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil, 
                      evar1=0, evar2=0, 
                      eS=0, eT=0, ePt=0, eSit=0, epK=epKstd,
                      k1k2='w14', kf='dg', ks="d", pHscale="T",
@@ -329,8 +349,8 @@ server <- function(input, output) {
     pCO2     <- absEt$pCO2
     CO3      <- absEt$CO3
     CO2      <- absEt$CO2
-    pCO2socn <- absEt$pCO2
     OmegaA   <- absEt$OmegaAragonite
+    OmegaC   <- absEt$OmegaCalcite
     HCO3     <- absEt$HCO3
     H        <- absEt$H
 
@@ -339,12 +359,18 @@ server <- function(input, output) {
     rH    <- relEt$H
     rpCO2 <- relEt$pCO2
     rCO2  <- relEt$CO2
-    rpCO2   <- relEt$pCO2
     rOmegaA <- relEt$OmegaAragonite
+    rOmegaC   <- relEt$OmegaCalcite
     rHCO3   <- relEt$HCO3
-    H       <- absEt$H
+    
+
 
     rHCO3H <- sqrt(rHCO3^2 + rH^2)
+
+    er_outvar = relEt[[menu_outvar]]
+
+
+   
 
     # ===================================================================
     # Compute other parts of error-space diagrams
@@ -353,7 +379,7 @@ server <- function(input, output) {
     # (Southern Ocean)
     print("Calculating constants-pair curve (errhalf fn):")
     errcirc <- errhalf(flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp, 
-                       Patm=1, P=menu_pressure, Pt=Phos, Sit=Sil,
+                       Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil,
                        epK=epKstd,
                        k1k2='l', kf='dg', ks="d", pHscale="T", 
                        b="u74", gas="potential", warn="n")  
@@ -369,7 +395,7 @@ server <- function(input, output) {
     print("Calculating balanced-pair line (errmid fn):")
     sigyspct <- seq(0,20,by=0.1) # in percent
     errm <- errmid(flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp,
-                  Patm=1, P=menu_pressure, Pt=Phos, Sit=Sil,
+                  Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil,
                   sigyspct, epK=epKstd,
                   k1k2='l', kf='dg', ks="d", pHscale="T", 
                   b="u74", gas="potential", warn="n")
@@ -382,20 +408,23 @@ server <- function(input, output) {
 
     # ===================================================================
     # Error-space diagram of relative error in CO3 for At-Ct input pair
-    dim(rCO3) <- c(length(DIC_e), length(ALK_e))
+    # dim(rCO3) <- c(length(DIC_e), length(ALK_e))
+    dim(er_outvar) <- c(length(DIC_e), length(ALK_e))
+    
     subtitle <- NULL
     xlabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
     ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
 
-    sigcritXa <- sig2_AtCt$CO3  ;  sigcritYa <- sig1_AtCt$CO3  #xdata; ydata
+    # sigcritXa <- sig2_AtCt$CO3  ;  sigcritYa <- sig1_AtCt$CO3  #xdata; ydata
+    sigcritXa <- sig2_AtCt[[menu_outvar]]  ;  sigcritYa <- sig1_AtCt[[menu_outvar]]  #xdata; ydata
     x <- DIC_e*1e+6  ;  y <- ALK_e*1e+6
-    za <- rCO3
+    za <- er_outvar #rCO3
     xlim <- c(0,20)  ; ylim <- xlim
     levels1 <- c(1,seq(2,20,by=2))
 
     plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,
-                   sig1hp_AtCt$CO3, sig2hp_AtCt$CO3,
-                   zenon(sigm2_AtCt$CO3), zenon(sigm1_AtCt$CO3),
+                   sig1hp_AtCt[[menu_outvar]], sig2hp_AtCt[[menu_outvar]],
+                   zenon(sigm2_AtCt[[menu_outvar]]), zenon(sigm1_AtCt[[menu_outvar]]),
                    DIC_e_soa2, ALK_e_soa2,
                    x, y, za, levels1,
                    'flattest')
