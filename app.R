@@ -19,45 +19,20 @@ ui <- fluidPage(
     sidebarPanel(
       # conditional menu to determine output var list given an input pair
       selectInput(inputId="flag", label="Input pair (var1, var2)", 
-                  c("ALK [umol/kg] and DIC [umol/kg]" = "15",
-                    "pH and CO2 [umol/kg]" = "1",
-                    # "CO2 and HCO3" = 2,
-                    # "CO2 and CO3" = 3,
-                    # "CO2 and ALK" = 4,
-                    # "CO2 and DIC" = 5,
-                    # "pH and HCO3" = 6,
-                    # "pH and CO3" = 7,
-                    "pH and ALK [umol/kg]" = "8",
-                    "pH and DIC [umol/kg]" = "9",
-                    # "HCO3 and CO3" = 10,
-                    # "HCO3 and ALK" = 11,
-                    # "HCO3 and DIC" = 12,
-                    # "CO3 and ALK" = 13,
-                    # "CO3 and DIC" = 14,
-                    "pCO2 [umol/kg] and pH" = "21",
-                    # "pCO2 and HCO3" = 22,
-                    # "pCO2 and CO3" = 23,
+                  c("ALK and DIC" = "15",
+                    "pH and ALK" = "8",
+                    "pH and DIC" = "9",
+                    "pCO2 and pH" = "21",
                     # "pCO2 and ALK" = "24", #Error: f() values at end points not of opposite sign
-                    "pCO2 [umol/kg] and DIC [umol/kg]" = "25"
+                    "pCO2 and DIC" = "25"
                   ),
                   selected = "15", multiple = FALSE,
                   selectize = TRUE, width = NULL, size = NULL),
 
       conditionalPanel(
-        condition = "input.flag == '1'", #exclude CO2* from list
-        selectInput(inputId="outvar_flag1", label="Output variable", 
-                  c("H+" = "H",
-                    "pCO2" = "pCO2",
-                    "CO3^2-" = "CO3",
-                    "HCO3-" = "HCO3",
-                    "OmegaCalcite" = "OmegaCalcite",
-                    "OmegaArgonite" = "OmegaAragonite"
-                  ),
-                  selected = "CO3", multiple = FALSE,
-                  selectize = TRUE, width = NULL, size = NULL)
-      ),
-      conditionalPanel(         
-        condition = "input.flag == '15' || input.flag == '8' || input.flag == '9'", #show full list
+        condition = "input.flag == '15'", #full output var list
+
+        # Output variable list
         selectInput(inputId="outvar_flag15", label="Output variable", 
                   c("H+" = "H",
                     "pCO2" = "pCO2",
@@ -68,22 +43,26 @@ ui <- fluidPage(
                     "OmegaArgonite" = "OmegaAragonite"
                   ),
                   selected = "CO3", multiple = FALSE,
-                  selectize = TRUE, width = NULL, size = NULL)
-      ),
-     conditionalPanel(
-        condition = "input.flag == '21' || input.flag == '24' || input.flag == '25'", #exclude pCO2 from list
-        selectInput(inputId="outvar_flag25", label="Output variable", 
-                  c("H+" = "H",                    
-                    "CO3^2-" = "CO3",
-                    "CO2*" = "CO2",
-                    "HCO3-" = "HCO3",
-                    "OmegaCalcite" = "OmegaCalcite",
-                    "OmegaArgonite" = "OmegaAragonite"
-                  ),
-                  selected = "CO3", multiple = FALSE,
-                  selectize = TRUE, width = NULL, size = NULL)
-      ),
-      
+                  selectize = TRUE, width = NULL, size = NULL),
+        
+        # Input pair values
+        fluidRow(
+          column(5, 
+            textInput(inputId = "var1_flag15",
+              label = "Alkalinity [umol/kg]",
+              value = 2295
+            )
+          ),
+
+          column(6,
+            textInput(inputId = "var2_flag15",
+              label = "Dissolved inorganic C [umol/kg]",
+              value = 2155
+            )
+          )
+         ) #./fluidRow
+      ), #./conditionalPanel
+    
                 
 
       textOutput("result"),
@@ -91,20 +70,6 @@ ui <- fluidPage(
 
      
       fluidRow(
-        column(3, 
-          textInput(inputId = "var1",
-            label = "var1",
-            value = 2295 #pass as umol/kg
-          )
-        ),
-
-        column(3,
-          textInput(inputId = "var2",
-            label = "var2",
-            value = 2155 #pass as umol/kg
-          )
-        ),
-
         column(3,
           textInput(inputId = "salt",
             label = "Salinity (psu)",
@@ -155,8 +120,7 @@ ui <- fluidPage(
     mainPanel(
       fluidRow(
         column( 5, plotOutput("erspace", width = "500px", height = "500px") )
-      )
-      
+      )      
     ) #./mainPanel
 
 
@@ -258,8 +222,6 @@ server <- function(input, output) {
     # ----------------
     # Approximate regional mean for Southern Ocean (c.f. Fig. 3.2 [Orr, 2011])
     menu_flag <- as.numeric(input$flag)
-    menu_var1 <- as.numeric(input$var1) * 1e-6 #convert umol/kg to mol/kg
-    menu_var2 <- as.numeric(input$var2) * 1e-6 #convert umol/kg to mol/kg
     menu_salt <- as.numeric(input$salt)
     menu_temp <- as.numeric(input$temp)
     menu_pressure <- as.numeric(input$pressure) /10  #convert dbars to bars
@@ -280,20 +242,37 @@ server <- function(input, output) {
     menu_outvar <- conditional_outvar()
     print("menu_outvar:")
     print(menu_outvar)
-   
 
-    # temp = -0.49    #C
-    # salt = 33.96    #psu
-    # press = 0       #bar
-    # Phos = 2.e-6    #(mol/kg)
-    # Sil = 60.e-6    #(mol/kg)
+    # CONDITIONAL CHECK OVER ALL INPUT FLAGS TO DEFINE:
+    # var1, var1_e, var1_e_soa, var1_e_soa2
+    # var2, var2_e, var2_e_soa, var2_e_soa2
+    if (input$flag == "15") { #var1=ALK, var2=DIC
+      menu_var1 <- as.numeric(input$var1_flag15) * 1e-6 #convert umol/kg to mol/kg
+      menu_var2 <- as.numeric(input$var2_flag15) * 1e-6 #convert umol/kg to mol/kg
+
+      # uncertainties in input variables var1 and var2
+      var1_e <- seq(0., 20., 1.0) * 1e-6
+      var2_e <- var1_e
+
+      # state-of-art errors for vars (c.f. Orr et al. 2017, Table 1)
+      # (to be plotted as crosses in error-space diagram)
+      var1_e_soa   <- 2 #umol/kg
+      var2_e_soa   <- 2 #umol/kg
+
+      var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
+      var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+
+      var1_e_soa2
+      var2_e_soa2
+
+      # data arrays for plot
+      xdata <- var2_e*1e+6  ;  ydata <- var1_e*1e+6
+    }
 
     # Uncertainties in input variables
     # ---------------------------------
-    ALK_e <- seq(0., 20., 1.0) * 1e-6
-    DIC_e <- ALK_e
-    pCO2_e <- seq(0,20,1)
-    pH_e   <- seq(0,0.03,0.0015)
+    # pCO2_e <- seq(0,20,1)
+    # pH_e   <- seq(0,0.03,0.0015)
 
     salt_e = 0.01   
     temp_e = 0.01   
@@ -318,8 +297,8 @@ server <- function(input, output) {
     # Keep only key columns to be consistent with output from 'errors.R' routine (called below)
     vars <- data.frame(H, vars[,c('pH','CO2','fCO2','pCO2','HCO3','CO3','OmegaAragonite','OmegaCalcite')] )
 
-    # Duplicate rows in *vars* until same as number of members of error vector ALK_e
-    numerrs <- length(ALK_e)
+    # Duplicate rows in *vars* until same as number of members of error vector var1_e
+    numerrs <- length(var1_e)
     vars <- vars[rep(row.names(vars), numerrs), ]
 
     # print(as.numeric(vars))
@@ -327,18 +306,7 @@ server <- function(input, output) {
     
     # ===================================================================
     # Use 1-D error vectors to build 2-D error array (to plot contours in DIC-ALK space)
-    dat <- expand.grid(DIC_e, ALK_e)
-
-    # Define state-of-art errors for vars (c.f. Orr et al. 2017, Table 1)
-    # (to be plotted as crosses in error-space diagram)
-    ALK_e_soa   <- 2 #umol/kg
-    DIC_e_soa   <- 2 #umol/kg
-
-    ALK_e_soa2  <- c(ALK_e_soa, ALK_e_soa)
-    DIC_e_soa2  <- c(DIC_e_soa, DIC_e_soa)
-
-    ALK_e_soa2
-    DIC_e_soa2
+    dat <- expand.grid(var2_e, var1_e)
 
     # ===================================================================
     # Compute derived vars and their errors
@@ -377,7 +345,7 @@ server <- function(input, output) {
     # Keep only key columns in vars for consistency with columns in absEt
     vars <- vars[,colnames(absEt)]
 
-    # Duplicate rows in *vars* until same as number of members of error vector ALK_e
+    # Duplicate rows in *vars* until same as number of members of error vector var1_e
     numerrs <- length(dat$Var1)
     vars <- vars[rep(row.names(vars), numerrs), ]
 
@@ -454,7 +422,7 @@ server <- function(input, output) {
 
     # ===================================================================
     # Error-space diagram of relative error in CO3 for At-Ct input pair
-    dim(er_outvar) <- c(length(DIC_e), length(ALK_e))
+    dim(er_outvar) <- c(length(var2_e), length(var1_e))
     
     subtitle <-paste("Output variable", menu_outvar, sep=" ")
     xlabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
@@ -462,7 +430,8 @@ server <- function(input, output) {
 
     # sigcritXa <- sig2_AtCt$CO3  ;  sigcritYa <- sig1_AtCt$CO3  #xdata; ydata
     sigcritXa <- sig2_AtCt[[menu_outvar]]  ;  sigcritYa <- sig1_AtCt[[menu_outvar]]  #xdata; ydata
-    x <- DIC_e*1e+6  ;  y <- ALK_e*1e+6
+    # x <- DIC_e*1e+6  ;  y <- ALK_e*1e+6
+    
     za <- er_outvar
     xlim <- c(0,20)  ; ylim <- xlim
     levels1 <- c(1,seq(2,20,by=2))
@@ -470,8 +439,8 @@ server <- function(input, output) {
     plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,
                    sig1hp_AtCt[[menu_outvar]], sig2hp_AtCt[[menu_outvar]],
                    zenon(sigm2_AtCt[[menu_outvar]]), zenon(sigm1_AtCt[[menu_outvar]]),
-                   DIC_e_soa2, ALK_e_soa2,
-                   x, y, za, levels1,
+                   var2_e_soa2, var1_e_soa2,
+                   xdata, ydata, za, levels1,
                    'flattest')
   })
 
