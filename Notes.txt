@@ -45,3 +45,27 @@ c("H+" = "H",
   "OmegaCalcite" = "OmegaCalcite",
   "OmegaArgonite" = "OmegaAragonite"
 ),
+
+Sample input parameter values:
+------------------------------
+http://www.whoi.edu/fileserver.do?id=53783&pt=2&p=58666
+
+# AT and DIC are known:
+carb(flag=15, var1=2400e-6, var2=2000e-6, S=35, T=25, P=0, Pt=0, Sit=0, k1k2="l", kf="pf", pHscale="T")
+
+# AT and DIC are known but one uses the Roy et al. constants and the free scale:
+carb(flag=15, var1=2400e-6, var2=2000e-6, S=35, T=25, P=0, Pt=0, Sit=0, k1k2="r", kf="dg", pHscale="F")
+
+# pH and AT are known:
+carb(flag=8, var1=8.2, var2=0.00234, S=35, T=25, P=0, Pt=0, Sit=0,
+	k1k2="l", kf="pf", pHscale="T")
+
+# pCO2 and AT are known:
+carb(flag=24, var1=370, var2=2400e-6, S=35, T=25, P=0, Pt=0, Sit=0,
+	k1k2="l", kf="pf", pHscale="T")
+
+# AT is known and one wants to know pCO2 at various pHs:
+seq(7.9, 8.2, 0.05)
+pH <- seq(7.9, 8.2, 0.05)
+carb(flag=8, var1=pH, var2=2400e-6, S=35, T=25, P=0, Pt=0, Sit=0,
+	k1k2="l", kf="pf", pHscale="T")
