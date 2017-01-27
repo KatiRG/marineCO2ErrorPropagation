@@ -99,6 +99,40 @@ ui <- fluidPage(
          ) #./fluidRow
       ), #./conditionalPanel
     
+      # CONDITIONAL CHECK FOR FLAG 9 (pH and DIC)
+      conditionalPanel(
+        condition = "input.flag == '9'", #full output var list
+
+        # Output variable list
+        selectInput(inputId="outvar_flag9", label="Output variable", 
+                  c("H+" = "H",
+                    "pCO2" = "pCO2",
+                    "CO3^2-" = "CO3",
+                    "CO2*" = "CO2",
+                    "HCO3-" = "HCO3",
+                    "OmegaCalcite" = "OmegaCalcite",
+                    "OmegaArgonite" = "OmegaAragonite"
+                  ),
+                  selected = "CO3", multiple = FALSE,
+                  selectize = TRUE, width = NULL, size = NULL),
+        
+        # Input pair values
+        fluidRow(
+          column(5, 
+            textInput(inputId = "var1_flag9",
+              label = "pH",
+              value = 8.1
+            )
+          ),
+
+          column(6,
+            textInput(inputId = "var2_flag9",
+              label = "Dissolved inorganic C [umol/kg]",
+              value = 2155
+            )
+          )
+         ) #./fluidRow
+      ), #./conditionalPanel
                 
 
       textOutput("result"),
@@ -327,6 +361,26 @@ server <- function(input, output) {
       levels1 <- c(4.2, seq(4,7,by=1))
       xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
       ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
+    } else if (input$flag == "9") { #var1=pH, var2=DIC
+      menu_var1 <- as.numeric(input$var1_flag9)
+      menu_var2 <- as.numeric(input$var2_flag9) * 1e-6 #convert umol/kg to mol/kg
+      
+      # Uncertainties in input variables
+      var1_e <- seq(0,0.03,0.0015)
+      var2_e <- seq(0., 20., 1.0) * 1e-6
+      
+      var1_e_soa   <- c(0.003, 0.01) #pH
+      var2_e_soa   <- 2 #umol/kg
+      
+      var1_e_soa2  <- var1_e_soa
+      var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+      
+      # for plot
+      xdata <- var1_e           ;  ydata <- var2_e * 1e+6
+      xlim <- c(0,0.03) ; ylim <- c(0,20) 
+      levels1 <- c(4.5, seq(1,20,by=1))
+      xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
+      ylabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
     }
 
     # Uncertainties in input variables
@@ -393,7 +447,7 @@ server <- function(input, output) {
     # Absolute errors: propagated uncertainties
     if (menu_flag == 15) {
       dat_evar1 <- dat$Var2           ;  dat_evar2 <- dat$Var1
-    } else if (menu_flag == 8) {
+    } else if (menu_flag == 8 || menu_flag == 9) {
       dat_evar1 <- dat$Var1           ;  dat_evar2 <- dat$Var2
     }
     absEt <- errors (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp,
@@ -438,7 +492,7 @@ server <- function(input, output) {
     if (menu_flag == 15) {
         sig1   <- data.frame(errcirc[1]) * 1e+6
         sig2   <- data.frame(errcirc[2]) * 1e+6
-    } else if (menu_flag == 8) {
+    } else if (menu_flag == 8 || menu_flag == 9) {
         sig1   <- data.frame(errcirc[1]) #this is a pH
         sig2   <- data.frame(errcirc[2]) * 1e+6
     }
@@ -454,10 +508,10 @@ server <- function(input, output) {
     # NB: Warning in sqrt(0.5 * (sigmay^2 - eKall^2)/dd1^2) : production de NaN
     # et: Warning in sqrt(0.5 * (sigmay^2 - eKall^2)/dd2^2) : production de NaN
 
-    if (menu_flag == 15) {
+    if (menu_flag == 15 ) {
       sigm1   <- data.frame(errm[1]) * 1e+6
       sigm2   <- data.frame(errm[2]) * 1e+6
-    } else if (menu_flag == 8) {
+    } else if (menu_flag == 8 || menu_flag == 9) {
       sigm1   <- data.frame(errm[1]) #this is a pH
       sigm2   <- data.frame(errm[2]) * 1e+6
     }
@@ -483,7 +537,7 @@ server <- function(input, output) {
                      var2_e_soa2, var1_e_soa2,
                      xdata, ydata, za, levels1,
                      'flattest')
-    } else if (menu_flag == 8) {
+    } else if (menu_flag == 8 || menu_flag == 9) {
       sigcritXa <- sig1[[menu_outvar]]  ;  sigcritYa <- sig2[[menu_outvar]]  #xdata; ydata
 
       plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,                     
