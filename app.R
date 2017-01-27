@@ -29,6 +29,7 @@ ui <- fluidPage(
                   selected = "15", multiple = FALSE,
                   selectize = TRUE, width = NULL, size = NULL),
 
+      # CONDITIONAL CHECK FOR FLAG 15 (ALK and DIC)
       conditionalPanel(
         condition = "input.flag == '15'", #full output var list
 
@@ -58,6 +59,41 @@ ui <- fluidPage(
             textInput(inputId = "var2_flag15",
               label = "Dissolved inorganic C [umol/kg]",
               value = 2155
+            )
+          )
+         ) #./fluidRow
+      ), #./conditionalPanel
+    
+      # CONDITIONAL CHECK FOR FLAG 8 (pH and ALK)
+      conditionalPanel(
+        condition = "input.flag == '8'", #full output var list
+
+        # Output variable list
+        selectInput(inputId="outvar_flag8", label="Output variable", 
+                  c("H+" = "H",
+                    "pCO2" = "pCO2",
+                    "CO3^2-" = "CO3",
+                    "CO2*" = "CO2",
+                    "HCO3-" = "HCO3",
+                    "OmegaCalcite" = "OmegaCalcite",
+                    "OmegaArgonite" = "OmegaAragonite"
+                  ),
+                  selected = "CO3", multiple = FALSE,
+                  selectize = TRUE, width = NULL, size = NULL),
+        
+        # Input pair values
+        fluidRow(
+          column(5, 
+            textInput(inputId = "var1_flag8",
+              label = "pH",
+              value = 8.1
+            )
+          ),
+
+          column(6,
+            textInput(inputId = "var2_flag8",
+              label = "Alkalinity [umol/kg]",
+              value = 2295
             )
           )
          ) #./fluidRow
@@ -152,6 +188,7 @@ server <- function(input, output) {
   epKstd  <- c(0.004, 0.015,  0.03, 0.01,  0.01, 0.02, 0.02, 0.01)
 
 
+
   # ===================================================================
   # Functions
 
@@ -232,11 +269,11 @@ server <- function(input, output) {
     conditional_outvar <- reactive({switch(
       input$flag,
       "1" = as.character(input$outvar_flag1),
-      "8" = as.character(input$outvar_flag15),  #full list
-      "9" = as.character(input$outvar_flag15),  #full list
+      "8" = as.character(input$outvar_flag8),  #full list
+      "9" = as.character(input$outvar_flag9),  #full list
       "15" = as.character(input$outvar_flag15),  #full list
-      "21" = as.character(input$outvar_flag25),  #exclude pCO2
-      "24" = as.character(input$outvar_flag25),  #exclude pCO2
+      "21" = as.character(input$outvar_flag21),  #exclude pCO2
+      "24" = as.character(input$outvar_flag24),  #exclude pCO2
       "25" = as.character(input$outvar_flag25)  #exclude pCO2
     )})
     menu_outvar <- conditional_outvar()
@@ -262,11 +299,34 @@ server <- function(input, output) {
       var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
       var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
 
-      var1_e_soa2
-      var2_e_soa2
 
       # data arrays for plot
       xdata <- var2_e*1e+6  ;  ydata <- var1_e*1e+6
+      xlim <- c(0,20)  ; ylim <- xlim
+      levels1 <- c(1,seq(2,20,by=2))
+      xlabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
+      ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
+
+    } else if (input$flag == "8") { #var1=pH, var2=ALK
+      menu_var1 <- as.numeric(input$var1_flag8)
+      menu_var2 <- as.numeric(input$var2_flag8) * 1e-6 #convert umol/kg to mol/kg
+      
+      # Uncertainties in input variables
+      var1_e <- seq(0,0.03,0.0015)
+      var2_e <- seq(0., 20., 1.0) * 1e-6
+      
+      var1_e_soa   <- c(0.003, 0.01) #pH
+      var2_e_soa   <- 2 #umol/kg
+      
+      var1_e_soa2  <- var1_e_soa
+      var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+      
+      # for plot
+      xdata <- var1_e           ;  ydata <- var2_e * 1e+6
+      xlim <- c(0,0.03) ; ylim <- c(0,20) 
+      levels1 <- c(4.2, seq(4,7,by=1))
+      xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
+      ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
     }
 
     # Uncertainties in input variables
@@ -274,19 +334,20 @@ server <- function(input, output) {
     # pCO2_e <- seq(0,20,1)
     # pH_e   <- seq(0,0.03,0.0015)
 
-    salt_e = 0.01   
-    temp_e = 0.01   
+    # salt_e = 0.01   
+    # temp_e = 0.01   
 
-    Pt_e = 0.1e-6
-    Sit_e = 4.0e-6
+    # Pt_e = 0.1e-6
+    # Sit_e = 4.0e-6
 
     # ===================================================================
     # Compute derived carbonate system vars with  seacarb routine carb
     # (Southern Ocean)
     print("Running carb function:")
-    vars <- carb  (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp, Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil, 
-                        k1k2='w14', kf='dg', ks="d", pHscale="T", 
-                        b="u74", gas="potential", warn='n')
+    vars <- carb  (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, 
+                   T=menu_temp, Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil, 
+                   k1k2='w14', kf='dg', ks="d", pHscale="T", 
+                   b="u74", gas="potential", warn='n')
 
     pH <- vars$pH
     pCO2 <- vars$pCO2
@@ -306,7 +367,10 @@ server <- function(input, output) {
     
     # ===================================================================
     # Use 1-D error vectors to build 2-D error array (to plot contours in DIC-ALK space)
-    dat <- expand.grid(var2_e, var1_e)
+    if (menu_flag == 15) dat <- expand.grid(var2_e, var1_e)
+    else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 21 || menu_flag == 24 || menu_flag == 25) {
+        dat <- expand.grid(var1_e,  var2_e)
+    }
 
     # ===================================================================
     # Compute derived vars and their errors
@@ -327,20 +391,17 @@ server <- function(input, output) {
     print("Calculating absEt and absEk:")
 
     # Absolute errors: propagated uncertainties
+    if (menu_flag == 15) {
+      dat_evar1 <- dat$Var2           ;  dat_evar2 <- dat$Var1
+    } else if (menu_flag == 8) {
+      dat_evar1 <- dat$Var1           ;  dat_evar2 <- dat$Var2
+    }
     absEt <- errors (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp,
                     Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil, 
-                    evar1=dat$Var2, evar2=dat$Var1, 
+                    evar1=dat_evar1, evar2=dat_evar2, 
                     eS=0, eT=0, ePt=0, eSit=0, epK=epKstd,
                     k1k2='w14', kf='dg', ks="d", pHscale="T",
                     b="u74", gas="potential", warn='no')
-
-    # Aboslute error from constants only (all other input errors assumed to be zero)
-    absEk <- errors  (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp, 
-                     Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil, 
-                     evar1=0, evar2=0, 
-                     eS=0, eT=0, ePt=0, eSit=0, epK=epKstd,
-                     k1k2='w14', kf='dg', ks="d", pHscale="T",
-                     b="u74", gas="potential", warn='n')
 
     # Keep only key columns in vars for consistency with columns in absEt
     vars <- vars[,colnames(absEt)]
@@ -352,34 +413,10 @@ server <- function(input, output) {
     print( dim(vars) ) #[1] 441   9 CORRECT
 
     #Relative errors (in percent)
-    relEk <- 100* absEk / vars[1,]  #Relative error from constants only
     relEt <- 100* absEt / vars      #Total relative error (from constants and other input vars)
 
     # ===================================================================
     # Define simpler names for changes in variables
-
-    # Absolute changes:
-    pH       <- absEt$pH
-    pCO2     <- absEt$pCO2
-    CO3      <- absEt$CO3
-    CO2      <- absEt$CO2
-    OmegaA   <- absEt$OmegaAragonite
-    OmegaC   <- absEt$OmegaCalcite
-    HCO3     <- absEt$HCO3
-    H        <- absEt$H
-
-    # Relative changes:
-    rCO3  <- relEt$CO3
-    rH    <- relEt$H
-    rpCO2 <- relEt$pCO2
-    rCO2  <- relEt$CO2
-    rOmegaA <- relEt$OmegaAragonite
-    rOmegaC   <- relEt$OmegaCalcite
-    rHCO3   <- relEt$HCO3
-    
-
-
-    rHCO3H <- sqrt(rHCO3^2 + rH^2)
 
     er_outvar = relEt[[menu_outvar]]
 
@@ -398,12 +435,13 @@ server <- function(input, output) {
                        k1k2='l', kf='dg', ks="d", pHscale="T", 
                        b="u74", gas="potential", warn="n")  
 
-    sig1_AtCt   <- data.frame(errcirc[1]) * 1e+6
-    sig2_AtCt   <- data.frame(errcirc[2]) * 1e+6
-    sigy_AtCt   <- data.frame(errcirc[3]) 
-    sig1hp_AtCt <- data.frame(errcirc[4]) * 1e+6
-    sig2hp_AtCt <- data.frame(errcirc[5]) * 1e+6
-
+    if (menu_flag == 15) {
+        sig1   <- data.frame(errcirc[1]) * 1e+6
+        sig2   <- data.frame(errcirc[2]) * 1e+6
+    } else if (menu_flag == 8) {
+        sig1   <- data.frame(errcirc[1]) #this is a pH
+        sig2   <- data.frame(errcirc[2]) * 1e+6
+    }
     # Balanced-pair LINE (input pair members contrbute equally to propagated error)
     # At-Ct pair (Southern Ocean)
     print("Calculating balanced-pair line (errmid fn):")
@@ -416,8 +454,14 @@ server <- function(input, output) {
     # NB: Warning in sqrt(0.5 * (sigmay^2 - eKall^2)/dd1^2) : production de NaN
     # et: Warning in sqrt(0.5 * (sigmay^2 - eKall^2)/dd2^2) : production de NaN
 
-    sigm1_AtCt   <- data.frame(errm[1]) * 1e+6
-    sigm2_AtCt   <- data.frame(errm[2]) * 1e+6
+    if (menu_flag == 15) {
+      sigm1   <- data.frame(errm[1]) * 1e+6
+      sigm2   <- data.frame(errm[2]) * 1e+6
+    } else if (menu_flag == 8) {
+      sigm1   <- data.frame(errm[1]) #this is a pH
+      sigm2   <- data.frame(errm[2]) * 1e+6
+    }
+
     
 
     # ===================================================================
@@ -425,24 +469,35 @@ server <- function(input, output) {
     dim(er_outvar) <- c(length(var2_e), length(var1_e))
     
     subtitle <-paste("Output variable", menu_outvar, sep=" ")
-    xlabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
-    ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
-
-    # sigcritXa <- sig2_AtCt$CO3  ;  sigcritYa <- sig1_AtCt$CO3  #xdata; ydata
-    sigcritXa <- sig2_AtCt[[menu_outvar]]  ;  sigcritYa <- sig1_AtCt[[menu_outvar]]  #xdata; ydata
-    # x <- DIC_e*1e+6  ;  y <- ALK_e*1e+6
+    
+    
     
     za <- er_outvar
-    xlim <- c(0,20)  ; ylim <- xlim
-    levels1 <- c(1,seq(2,20,by=2))
 
-    plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,
-                   sig1hp_AtCt[[menu_outvar]], sig2hp_AtCt[[menu_outvar]],
-                   zenon(sigm2_AtCt[[menu_outvar]]), zenon(sigm1_AtCt[[menu_outvar]]),
-                   var2_e_soa2, var1_e_soa2,
-                   xdata, ydata, za, levels1,
-                   'flattest')
+    if (menu_flag == 15) {
+      sigcritXa <- sig2[[menu_outvar]]  ;  sigcritYa <- sig1[[menu_outvar]]  #xdata; ydata
+
+      plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,                     
+                     NULL, NULL,
+                     zenon(sigm2[[menu_outvar]]), zenon(sigm1[[menu_outvar]]),
+                     var2_e_soa2, var1_e_soa2,
+                     xdata, ydata, za, levels1,
+                     'flattest')
+    } else if (menu_flag == 8) {
+      sigcritXa <- sig1[[menu_outvar]]  ;  sigcritYa <- sig2[[menu_outvar]]  #xdata; ydata
+
+      plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,                     
+                     NULL, NULL,
+                     zenon(sigm1[[menu_outvar]]), zenon(sigm2[[menu_outvar]]),
+                     var1_e_soa2, var2_e_soa2,
+                     xdata, ydata, za, levels1,
+                     'flattest')
+
+    }
+
+
   })
+
 
 
 }
