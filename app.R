@@ -133,6 +133,40 @@ ui <- fluidPage(
           )
          ) #./fluidRow
       ), #./conditionalPanel
+
+      # CONDITIONAL CHECK FOR FLAG 21 (pCO2 and pH)
+      conditionalPanel(
+        condition = "input.flag == '21'", #exclude pCO2
+
+        # Output variable list
+        selectInput(inputId="outvar_flag21", label="Output variable", 
+                  c("H+" = "H",
+                    "CO3^2-" = "CO3",
+                    "CO2*" = "CO2",
+                    "HCO3-" = "HCO3",
+                    "OmegaCalcite" = "OmegaCalcite",
+                    "OmegaArgonite" = "OmegaAragonite"
+                  ),
+                  selected = "CO3", multiple = FALSE,
+                  selectize = TRUE, width = NULL, size = NULL),
+        
+        # Input pair values
+        fluidRow(
+          column(5, 
+            textInput(inputId = "var1_flag21",
+              label = "pCO2 [uatm]",
+              value = 330.5
+            )
+          ),
+
+          column(6,
+            textInput(inputId = "var2_flag21",
+              label = "pH",
+              value = 8.1
+            )
+          )
+         ) #./fluidRow
+      ), #./conditionalPanel
                 
 
       textOutput("result"),
@@ -361,6 +395,7 @@ server <- function(input, output) {
       levels1 <- c(4.2, seq(4,7,by=1))
       xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
       ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
+    
     } else if (input$flag == "9") { #var1=pH, var2=DIC
       menu_var1 <- as.numeric(input$var1_flag9)
       menu_var2 <- as.numeric(input$var2_flag9) * 1e-6 #convert umol/kg to mol/kg
@@ -381,6 +416,27 @@ server <- function(input, output) {
       levels1 <- c(4.5, seq(1,20,by=1))
       xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
       ylabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
+    
+    } else if (input$flag == "21") { #var1=pCO2, var2=pH
+      menu_var1 <- as.numeric(input$var1_flag21)
+      menu_var2 <- as.numeric(input$var2_flag21)
+      
+      # Uncertainties in input variables
+      var1_e <- seq(0,20,1)
+      var2_e <- seq(0,0.03,0.0015)
+      
+      var1_e_soa   <- 2
+      var2_e_soa   <- c(0.003, 0.01)
+      
+      var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
+      var2_e_soa2  <- var2_e_soa
+      
+      # for plot
+      xdata <- var2_e           ;  ydata <- var1_e * 1e+6
+      xlim <- c(0,0.03)  ; ylim <- c(0,20)
+      levels1 <- c(5.4, 7, seq(0,20,by=2))
+      xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
+      ylabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
     }
 
     # Uncertainties in input variables
@@ -442,12 +498,12 @@ server <- function(input, output) {
     H = 10^(-1*vars$pH)         # H+ concentration (mol/kg)
     vars <- data.frame(H, vars) # Add H+ as new column to vars data frame
 
-    print("Calculating absEt and absEk:")
+    print("Calculating absEt:")
 
     # Absolute errors: propagated uncertainties
     if (menu_flag == 15) {
       dat_evar1 <- dat$Var2           ;  dat_evar2 <- dat$Var1
-    } else if (menu_flag == 8 || menu_flag == 9) {
+    } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 21) {
       dat_evar1 <- dat$Var1           ;  dat_evar2 <- dat$Var2
     }
     absEt <- errors (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp,
@@ -495,6 +551,9 @@ server <- function(input, output) {
     } else if (menu_flag == 8 || menu_flag == 9) {
         sig1   <- data.frame(errcirc[1]) #this is a pH
         sig2   <- data.frame(errcirc[2]) * 1e+6
+    } else if (menu_flag == 21) {
+      sig1   <- data.frame(errcirc[1]) #pCO2
+      sig2   <- data.frame(errcirc[2]) #pH
     }
     # Balanced-pair LINE (input pair members contrbute equally to propagated error)
     # At-Ct pair (Southern Ocean)
@@ -514,6 +573,9 @@ server <- function(input, output) {
     } else if (menu_flag == 8 || menu_flag == 9) {
       sigm1   <- data.frame(errm[1]) #this is a pH
       sigm2   <- data.frame(errm[2]) * 1e+6
+    } else if (menu_flag == 21) {
+      sigm1   <- data.frame(errm[1]) #pCO2
+      sigm2   <- data.frame(errm[2]) #pH
     }
 
     
@@ -528,7 +590,7 @@ server <- function(input, output) {
     
     za <- er_outvar
 
-    if (menu_flag == 15) {
+    if (menu_flag == 15 || menu_flag == 21) {
       sigcritXa <- sig2[[menu_outvar]]  ;  sigcritYa <- sig1[[menu_outvar]]  #xdata; ydata
 
       plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,                     
