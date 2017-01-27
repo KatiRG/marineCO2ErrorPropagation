@@ -508,7 +508,7 @@ server <- function(input, output) {
 
     } else if (input$flag == "24") { #var1=pCO2, var2=ALK
       menu_var1 <- as.numeric(input$var1_flag24)
-      menu_var2 <- as.numeric(input$var2_flag24)
+      menu_var2 <- as.numeric(input$var2_flag24) * 1e-6 #convert umol/kg to mol/kg
       
       # Uncertainties in input variables
       var1_e <- seq(0,20,1)
@@ -529,7 +529,7 @@ server <- function(input, output) {
     
     } else if (input$flag == "25") { #var1=pCO2, var2=DIC
       menu_var1 <- as.numeric(input$var1_flag25)
-      menu_var2 <- as.numeric(input$var2_flag25)
+      menu_var2 <- as.numeric(input$var2_flag25)* 1e-6 #convert umol/kg to mol/kg
       
       # Uncertainties in input variables
       var1_e <- seq(0,20,1)
@@ -544,7 +544,7 @@ server <- function(input, output) {
       # for plot
       xdata <- var1_e ; ydata <- var2_e*1e+6
       xlim <- c(0,20)  ; ylim <- xlim
-      levels1 <- seq(1,20,by=1)
+      levels1 <- c(4.7,seq(1,20,by=1))
       xlabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
       ylabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
     }
@@ -588,7 +588,7 @@ server <- function(input, output) {
     # ===================================================================
     # Use 1-D error vectors to build 2-D error array (to plot contours in DIC-ALK space)
     if (menu_flag == 15) dat <- expand.grid(var2_e, var1_e)
-    else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 21 || menu_flag == 24 || menu_flag == 25) {
+    else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 21 || menu_flag == 24 || menu_flag == 25) {        
         dat <- expand.grid(var1_e,  var2_e)
     }
 
@@ -615,6 +615,7 @@ server <- function(input, output) {
       dat_evar1 <- dat$Var2           ;  dat_evar2 <- dat$Var1
     } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 21 || menu_flag == 24 || menu_flag == 25) {
       dat_evar1 <- dat$Var1           ;  dat_evar2 <- dat$Var2
+      print("defining order for absET!!")
     }
     absEt <- errors (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp,
                     Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil, 
@@ -640,8 +641,6 @@ server <- function(input, output) {
 
     er_outvar = relEt[[menu_outvar]]
 
-
-   
 
     # ===================================================================
     # Compute other parts of error-space diagrams
@@ -674,18 +673,20 @@ server <- function(input, output) {
 
       sigm1   <- data.frame(errm[1]) * 1e+6
       sigm2   <- data.frame(errm[2]) * 1e+6
+
     } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 24 || menu_flag == 25) {
-      sig1   <- data.frame(errcirc[1]) #this is a pH
+      sig1   <- data.frame(errcirc[1])
       sig2   <- data.frame(errcirc[2]) * 1e+6
 
-      sigm1   <- data.frame(errm[1]) #this is a pH
+      sigm1   <- data.frame(errm[1])
       sigm2   <- data.frame(errm[2]) * 1e+6
+ 
     } else if (menu_flag == 21) {
-      sig1   <- data.frame(errcirc[1]) #pCO2
-      sig2   <- data.frame(errcirc[2]) #pH
+      sig1   <- data.frame(errcirc[1])
+      sig2   <- data.frame(errcirc[2])
 
-      sigm1   <- data.frame(errm[1]) #pCO2
-      sigm2   <- data.frame(errm[2]) #pH
+      sigm1   <- data.frame(errm[1])
+      sigm2   <- data.frame(errm[2])
     }
 
     
@@ -694,9 +695,7 @@ server <- function(input, output) {
     # Error-space diagram of relative error in CO3 for At-Ct input pair
     dim(er_outvar) <- c(length(var2_e), length(var1_e))
     
-    subtitle <-paste("Output variable", menu_outvar, sep=" ")
-    
-    
+    subtitle <-paste("Output variable", menu_outvar, sep=" ")      
     
     za <- er_outvar
 
@@ -709,7 +708,7 @@ server <- function(input, output) {
                      var2_e_soa2, var1_e_soa2,
                      xdata, ydata, za, levels1,
                      'flattest')
-    } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 24 || menu_flag == 25) {
+    } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 24 || menu_flag == 25) {      
       sigcritXa <- sig1[[menu_outvar]]  ;  sigcritYa <- sig2[[menu_outvar]]  #xdata; ydata
 
       plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,                     
@@ -718,7 +717,6 @@ server <- function(input, output) {
                      var1_e_soa2, var2_e_soa2,
                      xdata, ydata, za, levels1,
                      'flattest')
-
     }
 
 
