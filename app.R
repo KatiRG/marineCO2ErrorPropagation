@@ -500,9 +500,9 @@ server <- function(input, output) {
       var2_e_soa2  <- var2_e_soa
       
       # for plot
-      xdata <- var2_e           ;  ydata <- var1_e * 1e+6
+      xdata <- var2_e           ;  ydata <- var1_e
       xlim <- c(0,0.03)  ; ylim <- c(0,20)
-      levels1 <- c(5.4, 7, seq(0,20,by=2))
+      levels1 <- c(7,seq(0,20,by=2))
       xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
       ylabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
 
@@ -716,8 +716,13 @@ server <- function(input, output) {
                      zenon(sigm1[[menu_outvar]]), zenon(sigm2[[menu_outvar]]),
                      var1_e_soa2, var2_e_soa2,
                      xdata, ydata, za, levels1,
-                     'flattest')
+                     'flattest')      
     }
+
+    # print("sigm2:")
+    # print(sigm2[[menu_outvar]])
+    # print("sigm1:")
+    # print(sigm1[[menu_outvar]])
 
 
   })
