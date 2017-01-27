@@ -23,7 +23,7 @@ ui <- fluidPage(
                     "pH and ALK" = "8",
                     "pH and DIC" = "9",
                     "pCO2 and pH" = "21",
-                    "pCO2 and ALK" = "24", #Error: f() values at end points not of opposite sign
+                    # "pCO2 and ALK" = "24", #Error: f() values at end points not of opposite sign
                     "pCO2 and DIC" = "25"
                   ),
                   selected = "15", multiple = FALSE,
@@ -197,6 +197,40 @@ ui <- fluidPage(
             textInput(inputId = "var2_flag24",
               label = "Alkalinity [umol/kg]",
               value = 2295
+            )
+          )
+         ) #./fluidRow
+      ), #./conditionalPanel
+
+      # CONDITIONAL CHECK FOR FLAG 25 (pCO2 and DIC)
+      conditionalPanel(
+        condition = "input.flag == '25'", #exclude pCO2
+
+        # Output variable list
+        selectInput(inputId="outvar_flag25", label="Output variable", 
+                  c("H+" = "H",
+                    "CO3^2-" = "CO3",
+                    "CO2*" = "CO2",
+                    "HCO3-" = "HCO3",
+                    "OmegaCalcite" = "OmegaCalcite",
+                    "OmegaArgonite" = "OmegaAragonite"
+                  ),
+                  selected = "CO3", multiple = FALSE,
+                  selectize = TRUE, width = NULL, size = NULL),
+        
+        # Input pair values
+        fluidRow(
+          column(5, 
+            textInput(inputId = "var1_flag25",
+              label = "pCO2 [uatm]",
+              value = 330.5
+            )
+          ),
+
+          column(6,
+            textInput(inputId = "var2_flag25",
+              label = "Dissolved inorganic C [umol/kg]",
+              value = 2155
             )
           )
          ) #./fluidRow
@@ -492,6 +526,27 @@ server <- function(input, output) {
       levels1 <- seq(3,7,by=0.5)
       xlabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
       ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
+    
+    } else if (input$flag == "25") { #var1=pCO2, var2=DIC
+      menu_var1 <- as.numeric(input$var1_flag25)
+      menu_var2 <- as.numeric(input$var2_flag25)
+      
+      # Uncertainties in input variables
+      var1_e <- seq(0,20,1)
+      var2_e <- seq(0., 20., 1.0) * 1e-6
+      
+      var1_e_soa   <- 2
+      var2_e_soa   <- 2
+      
+      var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
+      var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+      
+      # for plot
+      xdata <- var1_e ; ydata <- var2_e*1e+6
+      xlim <- c(0,20)  ; ylim <- xlim
+      levels1 <- seq(1,20,by=1)
+      xlabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
+      ylabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
     }
 
     # Uncertainties in input variables
@@ -558,7 +613,7 @@ server <- function(input, output) {
     # Absolute errors: propagated uncertainties
     if (menu_flag == 15) {
       dat_evar1 <- dat$Var2           ;  dat_evar2 <- dat$Var1
-    } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 21 || menu_flag == 24) {
+    } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 21 || menu_flag == 24 || menu_flag == 25) {
       dat_evar1 <- dat$Var1           ;  dat_evar2 <- dat$Var2
     }
     absEt <- errors (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp,
@@ -619,7 +674,7 @@ server <- function(input, output) {
 
       sigm1   <- data.frame(errm[1]) * 1e+6
       sigm2   <- data.frame(errm[2]) * 1e+6
-    } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 24) {
+    } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 24 || menu_flag == 25) {
       sig1   <- data.frame(errcirc[1]) #this is a pH
       sig2   <- data.frame(errcirc[2]) * 1e+6
 
@@ -654,7 +709,7 @@ server <- function(input, output) {
                      var2_e_soa2, var1_e_soa2,
                      xdata, ydata, za, levels1,
                      'flattest')
-    } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 24) {
+    } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 24 || menu_flag == 25) {
       sigcritXa <- sig1[[menu_outvar]]  ;  sigcritYa <- sig2[[menu_outvar]]  #xdata; ydata
 
       plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,                     
