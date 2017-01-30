@@ -383,10 +383,10 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
 
 
     HTML('<footer style="
-            position:absolute; bottom:0; width:100%; height:50px; background-color: #f5f5f5; 
-            z-index: 1000;
+            position:absolute; bottom:0; width:100%; height:50px; color: white;
+            padding: 10px; background-color: #f5f5f5; z-index: 1000;
           ">
-            <p class="text-muted credit" style="margin:10px 0;">Created by
+            <p class="text-muted credit" style="margin:5px 0;">Created by
             <a target="_blank" href="http://www.lsce.ipsl.fr/en">
             <span title="Climate and Environment Sciences Laboratory" style="font-weight:bold;">
             LSCE</span></a>
@@ -470,10 +470,10 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
     ), #./fluidRow for FAQ2
 
     HTML('<footer style="
-            position:absolute; bottom:0; width:100%; height:50px; background-color: #f5f5f5; 
-            z-index: 1000;
+            position:absolute; bottom:0; width:100%; height:50px; color: white;
+            padding: 10px; background-color: #f5f5f5; z-index: 1000;
           ">
-            <p class="text-muted credit" style="margin:10px 0;">Created by
+            <p class="text-muted credit" style="margin:5px 0;">Created by
             <a target="_blank" href="http://www.lsce.ipsl.fr/en">
             <span title="Climate and Environment Sciences Laboratory" style="font-weight:bold;">
             LSCE</span></a>
