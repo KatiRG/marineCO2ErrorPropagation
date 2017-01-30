@@ -8,7 +8,7 @@ library(seacarb)
 
 # ui <- fluidPage(
 ui <- navbarPage("Error propagation for the marine CO2 system",
-  # includeCSS("lib/style.css"),
+  # includeCSS("style.css"),
 
   tabPanel("Error-space diagram",
 
@@ -834,6 +834,7 @@ server <- function(input, output) {
     vars <- data.frame(H, vars) # Add H+ as new column to vars data frame
 
     print("Calculating absEt:")
+    # withProgress(message = 'Calculating errors', value = 0, {
 
     # Absolute errors: propagated uncertainties
     if (menu_flag == 15) {
@@ -849,6 +850,9 @@ server <- function(input, output) {
                     k1k2='w14', kf='dg', ks="d", pHscale="T",
                     b="u74", gas="potential", warn='no')
 
+    # # Increment the progress bar, and update the detail text.
+    # incProgress(1, detail = paste("Doing part"))
+
     # Keep only key columns in vars for consistency with columns in absEt
     vars <- vars[,colnames(absEt)]
 
@@ -860,6 +864,8 @@ server <- function(input, output) {
 
     #Relative errors (in percent)
     relEt <- 100* absEt / vars      #Total relative error (from constants and other input vars)
+
+    # }) #./withProgress
 
     # ===================================================================
     # Define simpler names for changes in variables
