@@ -85,7 +85,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
             column(6,
               textInput(inputId = "level_flag15",
                 label = "Plot level",
-                value = "c(1,seq(2,20,by=2))"
+                value = "c(1,seq(2,20,by=1))"
               )
             )
           ) #./fluidRow
@@ -582,6 +582,9 @@ server <- function(input, output) {
   # Calculate and render plot based on user selections
   output$erspace <- renderPlot({
 
+    maxlim = 20
+    redn = 0.5 #reduce resolution by 50%
+
     # ===================================================================
     # Define input vars and their uncertainties
     # Specify flag & corresponding 2 input variables
@@ -623,7 +626,8 @@ server <- function(input, output) {
       scalefactor2 = 1e+6 #DIC
 
       # uncertainties in input variables var1 and var2
-      var1_e <- seq(0., 20., 1.0) * 1e-6
+      # NB: length of these arrays defines the resolution of the grid
+      var1_e <- seq(0., maxlim, 1/redn) * 1e-6
       var2_e <- var1_e
 
       # state-of-art errors for vars (c.f. Orr et al. 2017, Table 1)
@@ -637,7 +641,7 @@ server <- function(input, output) {
 
       # data arrays for plot
       xdata <- var2_e*1e+6  ;  ydata <- var1_e*1e+6
-      xlim <- c(0,20)  ; ylim <- xlim
+      xlim <- c(0,maxlim)  ; ylim <- xlim
       # levels1 <- c(1,seq(2,20,by=2))
       levels1 <- eval(parse(text = input$level_flag15))
       xlabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
@@ -652,8 +656,9 @@ server <- function(input, output) {
       scalefactor2 = 1e+6 #ALK
       
       # Uncertainties in input variables
-      var1_e <- seq(0,0.03,0.0015)
-      var2_e <- seq(0., 20., 1.0) * 1e-6
+      # NB: length of these arrays defines the resolution of the grid
+      var1_e <- seq(0,0.03,0.0015/redn)
+      var2_e <- seq(0., maxlim, 1/redn) * 1e-6
       
       var1_e_soa   <- c(0.003, 0.01) #pH
       var2_e_soa   <- 2 #umol/kg
@@ -663,7 +668,7 @@ server <- function(input, output) {
       
       # for plot
       xdata <- var1_e           ;  ydata <- var2_e * 1e+6
-      xlim <- c(0,0.03) ; ylim <- c(0,20) 
+      xlim <- c(0,0.03) ; ylim <- c(0,maxlim) 
       # levels1 <- c(4.2, seq(4,7,by=1))
       levels1 <- eval(parse(text = input$level_flag8))
       xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
@@ -678,8 +683,9 @@ server <- function(input, output) {
       scalefactor2 = 1e+6 #DIC
       
       # Uncertainties in input variables
-      var1_e <- seq(0,0.03,0.0015)
-      var2_e <- seq(0., 20., 1.0) * 1e-6
+      # NB: length of these arrays defines the resolution of the grid
+      var1_e <- seq(0,0.03,0.0015/redn)
+      var2_e <- seq(0., maxlim, 1/redn) * 1e-6
       
       var1_e_soa   <- c(0.003, 0.01) #pH
       var2_e_soa   <- 2 #umol/kg
@@ -689,7 +695,7 @@ server <- function(input, output) {
       
       # for plot
       xdata <- var1_e           ;  ydata <- var2_e * 1e+6
-      xlim <- c(0,0.03) ; ylim <- c(0,20) 
+      xlim <- c(0,0.03) ; ylim <- c(0,maxlim) 
       # levels1 <- c(4.5, seq(1,20,by=1))
       levels1 <- eval(parse(text = input$level_flag9))
       xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
@@ -704,8 +710,9 @@ server <- function(input, output) {
       scalefactor2 = 1 #pH
 
       # Uncertainties in input variables
-      var1_e <- seq(0,20,1)
-      var2_e <- seq(0,0.03,0.0015)
+      # NB: length of these arrays defines the resolution of the grid
+      var1_e <- seq(0,maxlim,1/redn)
+      var2_e <- seq(0,0.03,0.0015/redn)
       
       var1_e_soa   <- 2
       var2_e_soa   <- c(0.003, 0.01)
@@ -715,7 +722,7 @@ server <- function(input, output) {
       
       # for plot
       xdata <- var2_e           ;  ydata <- var1_e
-      xlim <- c(0,0.03)  ; ylim <- c(0,20)
+      xlim <- c(0,0.03)  ; ylim <- c(0,maxlim)
       # levels1 <- c(7,seq(0,20,by=2))
       levels1 <- eval(parse(text = input$level_flag21))
       xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
@@ -730,8 +737,9 @@ server <- function(input, output) {
       scalefactor2 = 1e+6 #ALK
       
       # Uncertainties in input variables
-      var1_e <- seq(0,20,1)
-      var2_e <- seq(0., 20., 1.0) * 1e-6
+      # NB: length of these arrays defines the resolution of the grid
+      var1_e <- seq(0,maxlim,1/redn)
+      var2_e <- seq(0., maxlim, 1/redn) * 1e-6
       
       var1_e_soa   <- 2
       var2_e_soa   <- 2
@@ -741,7 +749,7 @@ server <- function(input, output) {
       
       # for plot
       xdata <- var1_e ; ydata <- var2_e*1e+6
-      xlim <- c(0,20)  ; ylim <- xlim
+      xlim <- c(0,maxlim)  ; ylim <- xlim
       # levels1 <- seq(3,7,by=0.5)
       levels1 <- eval(parse(text = input$level_flag24))
       xlabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
@@ -756,8 +764,9 @@ server <- function(input, output) {
       scalefactor2 = 1e+6 #DIC
       
       # Uncertainties in input variables
-      var1_e <- seq(0,20,1)
-      var2_e <- seq(0., 20., 1.0) * 1e-6
+      # NB: length of these arrays defines the resolution of the grid
+      var1_e <- seq(0,maxlim,1/redn)
+      var2_e <- seq(0., maxlim, 1/redn) * 1e-6
       
       var1_e_soa   <- 2
       var2_e_soa   <- 2
@@ -767,23 +776,12 @@ server <- function(input, output) {
       
       # for plot
       xdata <- var1_e ; ydata <- var2_e*1e+6
-      xlim <- c(0,20)  ; ylim <- xlim
+      xlim <- c(0,maxlim)  ; ylim <- xlim
       # levels1 <- c(4.7,seq(1,20,by=1))
       levels1 <- eval(parse(text = input$level_flag25))
       xlabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
       ylabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
     }
-
-    # Uncertainties in input variables
-    # ---------------------------------
-    # pCO2_e <- seq(0,20,1)
-    # pH_e   <- seq(0,0.03,0.0015)
-
-    # salt_e = 0.01   
-    # temp_e = 0.01   
-
-    # Pt_e = 0.1e-6
-    # Sit_e = 4.0e-6
 
     # ===================================================================
     # Compute derived carbonate system vars with  seacarb routine carb
@@ -888,7 +886,7 @@ server <- function(input, output) {
     # Balanced-pair LINE (input pair members contrbute equally to propagated error)
     # At-Ct pair (Southern Ocean)
     print("Calculating balanced-pair line (errmid fn):")
-    sigyspct <- seq(0,20,by=0.1) # in percent
+    sigyspct <- seq(0,maxlim,by=1/redn) # in percent
     errm <- errmid(flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp,
                   Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil,
                   sigyspct, epK=epKstd,
