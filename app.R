@@ -487,6 +487,10 @@ server <- function(input, output) {
       menu_var1 <- as.numeric(input$var1_flag15) * 1e-6 #convert umol/kg to mol/kg
       menu_var2 <- as.numeric(input$var2_flag15) * 1e-6 #convert umol/kg to mol/kg
 
+      # Scale factor for sig, sigm
+      scalefactor1 = 1e+6 #ALK
+      scalefactor2 = 1e+6 #DIC
+
       # uncertainties in input variables var1 and var2
       var1_e <- seq(0., 20., 1.0) * 1e-6
       var2_e <- var1_e
@@ -511,6 +515,10 @@ server <- function(input, output) {
     } else if (input$flag == "8") { #var1=pH, var2=ALK
       menu_var1 <- as.numeric(input$var1_flag8)
       menu_var2 <- as.numeric(input$var2_flag8) * 1e-6 #convert umol/kg to mol/kg
+
+      # Scale factor for sig, sigm
+      scalefactor1 = 1 #pH
+      scalefactor2 = 1e+6 #ALK
       
       # Uncertainties in input variables
       var1_e <- seq(0,0.03,0.0015)
@@ -533,6 +541,10 @@ server <- function(input, output) {
     } else if (input$flag == "9") { #var1=pH, var2=DIC
       menu_var1 <- as.numeric(input$var1_flag9)
       menu_var2 <- as.numeric(input$var2_flag9) * 1e-6 #convert umol/kg to mol/kg
+
+      # Scale factor for sig, sigm
+      scalefactor1 = 1 #pH
+      scalefactor2 = 1e+6 #DIC
       
       # Uncertainties in input variables
       var1_e <- seq(0,0.03,0.0015)
@@ -556,6 +568,10 @@ server <- function(input, output) {
       menu_var1 <- as.numeric(input$var1_flag21)
       menu_var2 <- as.numeric(input$var2_flag21)
       
+      # Scale factor for sig, sigm
+      scalefactor1 = 1 #pCO2
+      scalefactor2 = 1 #pH
+
       # Uncertainties in input variables
       var1_e <- seq(0,20,1)
       var2_e <- seq(0,0.03,0.0015)
@@ -577,6 +593,10 @@ server <- function(input, output) {
     } else if (input$flag == "24") { #var1=pCO2, var2=ALK
       menu_var1 <- as.numeric(input$var1_flag24)
       menu_var2 <- as.numeric(input$var2_flag24) * 1e-6 #convert umol/kg to mol/kg
+
+      # Scale factor for sig, sigm
+      scalefactor1 = 1 #pCO2
+      scalefactor2 = 1e+6 #ALK
       
       # Uncertainties in input variables
       var1_e <- seq(0,20,1)
@@ -599,6 +619,10 @@ server <- function(input, output) {
     } else if (input$flag == "25") { #var1=pCO2, var2=DIC
       menu_var1 <- as.numeric(input$var1_flag25)
       menu_var2 <- as.numeric(input$var2_flag25)* 1e-6 #convert umol/kg to mol/kg
+
+      # Scale factor for sig, sigm
+      scalefactor1 = 1 #pCO2
+      scalefactor2 = 1e+6 #DIC
       
       # Uncertainties in input variables
       var1_e <- seq(0,20,1)
@@ -737,28 +761,33 @@ server <- function(input, output) {
     # et: Warning in sqrt(0.5 * (sigmay^2 - eKall^2)/dd2^2) : production de NaN
 
     # Add scale factors if necessary
-    if (menu_flag == 15 ) {
-      sig1   <- data.frame(errcirc[1]) * 1e+6
-      sig2   <- data.frame(errcirc[2]) * 1e+6
+    # if (menu_flag == 15 ) {
+    #   sig1   <- data.frame(errcirc[1]) * 1e+6
+    #   sig2   <- data.frame(errcirc[2]) * 1e+6
 
-      sigm1   <- data.frame(errm[1]) * 1e+6
-      sigm2   <- data.frame(errm[2]) * 1e+6
+    #   sigm1   <- data.frame(errm[1]) * 1e+6
+    #   sigm2   <- data.frame(errm[2]) * 1e+6
 
-    } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 24 || menu_flag == 25) {
-      sig1   <- data.frame(errcirc[1])
-      sig2   <- data.frame(errcirc[2]) * 1e+6
+    # } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 24 || menu_flag == 25) {
+    #   sig1   <- data.frame(errcirc[1])
+    #   sig2   <- data.frame(errcirc[2]) * 1e+6
 
-      sigm1   <- data.frame(errm[1])
-      sigm2   <- data.frame(errm[2]) * 1e+6
+    #   sigm1   <- data.frame(errm[1])
+    #   sigm2   <- data.frame(errm[2]) * 1e+6
  
-    } else if (menu_flag == 21) {
-      sig1   <- data.frame(errcirc[1])
-      sig2   <- data.frame(errcirc[2])
+    # } else if (menu_flag == 21) {
+    #   sig1   <- data.frame(errcirc[1])
+    #   sig2   <- data.frame(errcirc[2])
 
-      sigm1   <- data.frame(errm[1])
-      sigm2   <- data.frame(errm[2])
-    }
+    #   sigm1   <- data.frame(errm[1])
+    #   sigm2   <- data.frame(errm[2])
+    # }
 
+    sig1   <- data.frame(errcirc[1]) * scalefactor1
+    sig2   <- data.frame(errcirc[2]) * scalefactor2
+        
+    sigm1   <- data.frame(errm[1]) * scalefactor1
+    sigm2   <- data.frame(errm[2]) * scalefactor2
     
 
     # ===================================================================
