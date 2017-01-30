@@ -8,476 +8,491 @@ library(seacarb)
 
 # ui <- fluidPage(
 ui <- navbarPage("Error propagation for the marine CO2 system",
+  # includeCSS("lib/style.css"),
 
   tabPanel("Error-space diagram",
 
-  tags$h3("Interactive error-space diagram"),
+    tags$h3("Interactive error-space diagram"),
 
-  fluidRow(
-    column(5, 
-      tags$p("Choose an input pair and change their default values if desired."),
-      tags$p("Choose the output variable to be calculated based on the input 
-              values and (modifiable) values for salinity, temperature, pressure, 
-              phosphate and silicon."),
-      tags$p("The default plot level is also modifiable.")
+    fluidRow(
+      column(5, 
+        tags$p("Choose an input pair and change their default values if desired."),
+        tags$p("Choose the output variable to be calculated based on the input 
+                values and (modifiable) values for salinity, temperature, pressure, 
+                phosphate and silicon."),
+        tags$p("The default plot level is also modifiable.")
 
-    )
-  ), #./fluidRow for intro text
-  
-  # tags$p("Implements error function, allowing user to change various input values:"),
-
-  # tags$p('errors(flag, var1, var2, S=35, T=25, Patm=1, P=0, Pt=0, Sit=0, 
-  #             evar1=0, evar2=0, eS=0.01, eT=0.01, ePt=0, eSit=0, 
-  #             epK=c(0.002, 0.01, 0.02, 0.01, 0.01, 0.02, 0.02)'),
-
-  sidebarLayout(
-    sidebarPanel(
-      # conditional menu to determine output var list given an input pair
-      selectInput(inputId="flag", label="Input pair (var1, var2)", 
-                  c("ALK and DIC" = "15",
-                    "pH and ALK" = "8",
-                    "pH and DIC" = "9",
-                    "pCO2 and pH" = "21",
-                    "pCO2 and ALK" = "24", #Error: f() values at end points not of opposite sign
-                    "pCO2 and DIC" = "25"
-                  ),
-                  selected = "15", multiple = FALSE,
-                  selectize = TRUE, width = NULL, size = NULL),
-
-      # CONDITIONAL CHECK FOR FLAG 15 (ALK and DIC)
-      conditionalPanel(
-        condition = "input.flag == '15'", #full output var list      
-        
-        # Input pair values
-        fluidRow(
-          column(5, 
-            textInput(inputId = "var1_flag15",
-              label = "Alkalinity [umol/kg]",
-              value = 2295
-            )
-          ),
-
-          column(6,
-            textInput(inputId = "var2_flag15",
-              label = "Dissolved inorganic C [umol/kg]",
-              value = 2155
-            )
-          )
-        ), #./fluidRow for input pair
-
-         # Output variable list
-        selectInput(inputId="outvar_flag15", label="Output variable", 
-                  c("H+" = "H",
-                    "pCO2" = "pCO2",
-                    "CO3^2-" = "CO3",
-                    "CO2*" = "CO2",
-                    "HCO3-" = "HCO3",
-                    "OmegaCalcite" = "OmegaCalcite",
-                    "OmegaArgonite" = "OmegaAragonite"
-                  ),
-                  selected = "CO3", multiple = FALSE,
-                  selectize = TRUE, width = NULL, size = NULL
-        ),
-
-        # Plot level
-        fluidRow(
-          column(6,
-            textInput(inputId = "level_flag15",
-              label = "Plot level",
-              value = "c(1,seq(2,20,by=2))"
-            )
-          )
-        ) #./fluidRow
-
-      ), #./conditionalPanel
-    
-      # CONDITIONAL CHECK FOR FLAG 8 (pH and ALK)
-      conditionalPanel(
-        condition = "input.flag == '8'", #full output var list
-
-        # Output variable list
-        selectInput(inputId="outvar_flag8", label="Output variable", 
-                  c("H+" = "H",
-                    "pCO2" = "pCO2",
-                    "CO3^2-" = "CO3",
-                    "CO2*" = "CO2",
-                    "HCO3-" = "HCO3",
-                    "OmegaCalcite" = "OmegaCalcite",
-                    "OmegaArgonite" = "OmegaAragonite"
-                  ),
-                  selected = "CO3", multiple = FALSE,
-                  selectize = TRUE, width = NULL, size = NULL),
-        
-        # Input pair values
-        fluidRow(
-          column(5, 
-            textInput(inputId = "var1_flag8",
-              label = "pH",
-              value = 8.1
-            )
-          ),
-
-          column(6,
-            textInput(inputId = "var2_flag8",
-              label = "Alkalinity [umol/kg]",
-              value = 2295
-            )
-          )
-         ), #./fluidRow
-        
-        # Plot level
-        fluidRow(
-          column(6,
-            textInput(inputId = "level_flag8",
-              label = "Plot level",
-              value = "c(4.2, seq(4,7,by=1))"
-            )
-          )
-        ) #./fluidRow
-
-      ), #./conditionalPanel
-    
-      # CONDITIONAL CHECK FOR FLAG 9 (pH and DIC)
-      conditionalPanel(
-        condition = "input.flag == '9'", #full output var list
-
-        # Output variable list
-        selectInput(inputId="outvar_flag9", label="Output variable", 
-                  c("H+" = "H",
-                    "pCO2" = "pCO2",
-                    "CO3^2-" = "CO3",
-                    "CO2*" = "CO2",
-                    "HCO3-" = "HCO3",
-                    "OmegaCalcite" = "OmegaCalcite",
-                    "OmegaArgonite" = "OmegaAragonite"
-                  ),
-                  selected = "CO3", multiple = FALSE,
-                  selectize = TRUE, width = NULL, size = NULL),
-        
-        # Input pair values
-        fluidRow(
-          column(5, 
-            textInput(inputId = "var1_flag9",
-              label = "pH",
-              value = 8.1
-            )
-          ),
-
-          column(6,
-            textInput(inputId = "var2_flag9",
-              label = "Dissolved inorganic C [umol/kg]",
-              value = 2155
-            )
-          )
-         ), #./fluidRow
-
-        # Plot level
-        fluidRow(
-          column(6,
-            textInput(inputId = "level_flag9",
-              label = "Plot level",
-              value = "c(4.5, seq(1,20,by=1))"
-            )
-          )
-        ) #./fluidRow
-      ), #./conditionalPanel
-
-      # CONDITIONAL CHECK FOR FLAG 21 (pCO2 and pH)
-      conditionalPanel(
-        condition = "input.flag == '21'", #exclude pCO2
-
-        # Output variable list
-        selectInput(inputId="outvar_flag21", label="Output variable", 
-                  c("H+" = "H",
-                    "CO3^2-" = "CO3",
-                    "CO2*" = "CO2",
-                    "HCO3-" = "HCO3",
-                    "OmegaCalcite" = "OmegaCalcite",
-                    "OmegaArgonite" = "OmegaAragonite"
-                  ),
-                  selected = "CO3", multiple = FALSE,
-                  selectize = TRUE, width = NULL, size = NULL),
-        
-        # Input pair values
-        fluidRow(
-          column(5, 
-            textInput(inputId = "var1_flag21",
-              label = "pCO2 [uatm]",
-              value = 330.5
-            )
-          ),
-
-          column(6,
-            textInput(inputId = "var2_flag21",
-              label = "pH",
-              value = 8.1
-            )
-          )
-         ), #./fluidRow
-        
-        # Plot level
-        fluidRow(
-          column(6,
-            textInput(inputId = "level_flag21",
-              label = "Plot level",
-              value = "c(7,seq(0,20,by=2))"
-            )
-          )
-        ) #./fluidRow
-
-      ), #./conditionalPanel
-
-      # CONDITIONAL CHECK FOR FLAG 24 (pCO2 and ALK)
-      conditionalPanel(
-        condition = "input.flag == '24'", #exclude pCO2
-
-        # Output variable list
-        selectInput(inputId="outvar_flag24", label="Output variable", 
-                  c("H+" = "H",
-                    "CO3^2-" = "CO3",
-                    "CO2*" = "CO2",
-                    "HCO3-" = "HCO3",
-                    "OmegaCalcite" = "OmegaCalcite",
-                    "OmegaArgonite" = "OmegaAragonite"
-                  ),
-                  selected = "CO3", multiple = FALSE,
-                  selectize = TRUE, width = NULL, size = NULL),
-        
-        # Input pair values
-        fluidRow(
-          column(5, 
-            textInput(inputId = "var1_flag24",
-              label = "pCO2 [uatm]",
-              value = 330.5
-            )
-          ),
-
-          column(6,
-            textInput(inputId = "var2_flag24",
-              label = "Alkalinity [umol/kg]",
-              value = 2295
-            )
-          )
-         ), #./fluidRow
-
-        # Plot level
-        fluidRow(
-          column(6,
-            textInput(inputId = "level_flag24",
-              label = "Plot level",
-              value = "seq(3,7,by=0.5)"
-            )
-          )
-        ) #./fluidRow
-      ), #./conditionalPanel
-
-      # CONDITIONAL CHECK FOR FLAG 25 (pCO2 and DIC)
-      conditionalPanel(
-        condition = "input.flag == '25'", #exclude pCO2
-
-        # Output variable list
-        selectInput(inputId="outvar_flag25", label="Output variable", 
-                  c("H+" = "H",
-                    "CO3^2-" = "CO3",
-                    "CO2*" = "CO2",
-                    "HCO3-" = "HCO3",
-                    "OmegaCalcite" = "OmegaCalcite",
-                    "OmegaArgonite" = "OmegaAragonite"
-                  ),
-                  selected = "CO3", multiple = FALSE,
-                  selectize = TRUE, width = NULL, size = NULL),
-        
-        # Input pair values
-        fluidRow(
-          column(5, 
-            textInput(inputId = "var1_flag25",
-              label = "pCO2 [uatm]",
-              value = 330.5
-            )
-          ),
-
-          column(6,
-            textInput(inputId = "var2_flag25",
-              label = "Dissolved inorganic C [umol/kg]",
-              value = 2155
-            )
-          )
-         ), #./fluidRow
-        
-        # Plot level
-        fluidRow(
-          column(6,
-            textInput(inputId = "level_flag25",
-              label = "Plot level",
-              value = "c(4.7,seq(1,20,by=1))"
-            )
-          )
-        ) #./fluidRow
-
-      ), #./conditionalPanel
-                
-
-      textOutput("result"),
-      tags$br(),
-
-     
-      fluidRow(
-        column(3,
-          textInput(inputId = "salt",
-            label = "Salinity (psu)",
-            value = 35
-          )
-        ),
-
-         column(3,
-          textInput(inputId = "temp",
-            label = "Temperature (C)",
-            value = -0.49
-          )
-        )
-
-      ), #./fluidRow
-
-      fluidRow(
-        column(3, 
-          textInput(inputId = "pressure",
-            label = "Pressure (dbars)",
-            value = 0 #pass as dbar
-          )
-        ),
-
-        column(4,
-          textInput(inputId = "phos",
-            label = "[Phosphate] (umol/kg)",
-            value = 2  #2.e-6 mol/kg
-          )
-        ),
-
-        column(4, 
-          textInput(inputId = "sil",
-            label = "[Silicon] (umol/kg)",
-            value = 60 #60.e-6 mol/kg
-          )
-        )
-      ) #./fluidRow
-
-      # sliderInput(inputId = "evar1",
-      #   label = "Max error in first var (must be > 0):",
-      #   value = 0, min = 0, max = 20
-      # )
-
-
-    ), #./sidebarPanel
-
-    mainPanel(
-      fluidRow(
-        column( 5, plotOutput("erspace", width = "500px", height = "500px") )
-      )      
-    ) #./mainPanel
-
-    
-    
-
-  ), #./sidebarLayout
-  # footer here
-  # tags$footer(
-  #   tags$p("Footer message here."), 
-  #   style = "
-  #     * {
-  #       margin: 0;
-  #     }
-  #     html, body {
-  #       height: 100%;
-  #     }
-  #     .wrapper {
-  #       min-height: 100%;
-  #       height: auto !important; /* This line and the next line are not necessary unless you need IE6 support */
-  #       height: 100%;
-  #       margin: 0 auto -155px; /* the bottom margin is the negative value of the footer's height */
-  #     }
-  #     .footer, .push {
-  #       height: 155px; /* .push must be the same height as .footer */
-  #       background-color: #f5f5f5;
-  #     }
-
-  #     /* Sticky Footer by Ryan Fait http://ryanfait.com/ */"
-  
-
-  # ) #./footer
-
-  tags$footer(title="Your footer here", align = "right", style = "
-    position:absolute;
-    bottom:0;
-    width:100%;
-    height:50px; /* Height of the footer */
-    color: white;
-    padding: 10px;
-    background-color: #f5f5f5;
-    z-index: 1000;"
-  )
-
- 
-
-),  #./tabPanel_1
-
-tabPanel("Help",
-
-  fluidRow(
-    column(5,
-      tags$html(
-        tags$body("To quantify errors more generally and assess the potential for improvement, 
-                this application uses the errors routine from the ",
-                a("seacarb package", href="https://github.com/jamesorr/seacarb-git", 
-                  target="blank"), "to construct an error-space diagram showing how 
-                uncertainties in derived variables are affected by 
-                the range of possible uncertainties in input variables."
-        ),
-      tags$br(),
-      tags$br(),
-      tags$body("Based on the work published by ",
-                a("Orr et al.,", href="https://github.com/jamesorr/seacarb-git", 
-                  target="blank"), " (submitted, 2017)."
-        )
       )
+    ), #./fluidRow for intro text
+    
+    # tags$p("Implements error function, allowing user to change various input values:"),
 
-    ) #./column
-  ), #./fluidRow for intro help text
+    # tags$p('errors(flag, var1, var2, S=35, T=25, Patm=1, P=0, Pt=0, Sit=0, 
+    #             evar1=0, evar2=0, eS=0.01, eT=0.01, ePt=0, eSit=0, 
+    #             epK=c(0.002, 0.01, 0.02, 0.01, 0.01, 0.02, 0.02)'),
 
-  tags$h3("Error-space diagram"),
-  fluidRow(
-    column(5,
-      tags$html(
-        tags$body("Error-space diagrams are contour plots that provide the propagated uncertainty 
-                  in the computed variable as a function of the range of uncertainties in each 
-                  member of the input pair, assuming total uncertainties from the equilibrium 
-                  constants given in ",
-                  a("Table 1", href="https://github.com/jamesorr/seacarb-git", 
-                  target="blank"), " of the manuscript."
-        )
-      )
-    )
-  ), #./fluidRow for FAQ1
+    sidebarLayout(
+      sidebarPanel(
+        # conditional menu to determine output var list given an input pair
+        selectInput(inputId="flag", label="Input pair (var1, var2)", 
+                    c("ALK and DIC" = "15",
+                      "pH and ALK" = "8",
+                      "pH and DIC" = "9",
+                      "pCO2 and pH" = "21",
+                      "pCO2 and ALK" = "24", #Error: f() values at end points not of opposite sign
+                      "pCO2 and DIC" = "25"
+                    ),
+                    selected = "15", multiple = FALSE,
+                    selectize = TRUE, width = NULL, size = NULL),
 
-  tags$h3("Error calculation"),
-  fluidRow(
-    column(5,
-           tags$html(
-            tags$body("Estimates uncertainties in computed carbonate system variables by 
-                  propagating standard error (uncertainty) in six input variables, 
-                  including the input pair of carbonate system variables,  
-                  the two input nutrients (silicate and phosphate concentrations),  
-                  temperature and salinity, as well as the errors in the key dissociation 
-                  constants pK0, pK1, pK2, pKb, pKw, pKspa and pKspc.  "
+        # CONDITIONAL CHECK FOR FLAG 15 (ALK and DIC)
+        conditionalPanel(
+          condition = "input.flag == '15'", #full output var list      
+          
+          # Input pair values
+          fluidRow(
+            column(5, 
+              textInput(inputId = "var1_flag15",
+                label = "Alkalinity [umol/kg]",
+                value = 2295
+              )
             ),
-            tags$br(),
-            tags$br(),
-            tags$body("Uses the ",
-                    a("'errors' function", href="https://rdrr.io/cran/seacarb/man/errors.html", 
-                      target="blank"), " function of the seacarb package."
+
+            column(6,
+              textInput(inputId = "var2_flag15",
+                label = "Dissolved inorganic C [umol/kg]",
+                value = 2155
+              )
             )
-          ) #./html
-    ) #./column
-  ) #./fluidRow for FAQ2
+          ), #./fluidRow for input pair
+
+           # Output variable list
+          selectInput(inputId="outvar_flag15", label="Output variable", 
+                    c("H+" = "H",
+                      "pCO2" = "pCO2",
+                      "CO3^2-" = "CO3",
+                      "CO2*" = "CO2",
+                      "HCO3-" = "HCO3",
+                      "OmegaCalcite" = "OmegaCalcite",
+                      "OmegaArgonite" = "OmegaAragonite"
+                    ),
+                    selected = "CO3", multiple = FALSE,
+                    selectize = TRUE, width = NULL, size = NULL
+          ),
+
+          # Plot level
+          fluidRow(
+            column(6,
+              textInput(inputId = "level_flag15",
+                label = "Plot level",
+                value = "c(1,seq(2,20,by=2))"
+              )
+            )
+          ) #./fluidRow
+
+        ), #./conditionalPanel
+      
+        # CONDITIONAL CHECK FOR FLAG 8 (pH and ALK)
+        conditionalPanel(
+          condition = "input.flag == '8'", #full output var list
+
+          # Output variable list
+          selectInput(inputId="outvar_flag8", label="Output variable", 
+                    c("H+" = "H",
+                      "pCO2" = "pCO2",
+                      "CO3^2-" = "CO3",
+                      "CO2*" = "CO2",
+                      "HCO3-" = "HCO3",
+                      "OmegaCalcite" = "OmegaCalcite",
+                      "OmegaArgonite" = "OmegaAragonite"
+                    ),
+                    selected = "CO3", multiple = FALSE,
+                    selectize = TRUE, width = NULL, size = NULL),
+          
+          # Input pair values
+          fluidRow(
+            column(5, 
+              textInput(inputId = "var1_flag8",
+                label = "pH",
+                value = 8.1
+              )
+            ),
+
+            column(6,
+              textInput(inputId = "var2_flag8",
+                label = "Alkalinity [umol/kg]",
+                value = 2295
+              )
+            )
+           ), #./fluidRow
+          
+          # Plot level
+          fluidRow(
+            column(6,
+              textInput(inputId = "level_flag8",
+                label = "Plot level",
+                value = "c(4.2, seq(4,7,by=1))"
+              )
+            )
+          ) #./fluidRow
+
+        ), #./conditionalPanel
+      
+        # CONDITIONAL CHECK FOR FLAG 9 (pH and DIC)
+        conditionalPanel(
+          condition = "input.flag == '9'", #full output var list
+
+          # Output variable list
+          selectInput(inputId="outvar_flag9", label="Output variable", 
+                    c("H+" = "H",
+                      "pCO2" = "pCO2",
+                      "CO3^2-" = "CO3",
+                      "CO2*" = "CO2",
+                      "HCO3-" = "HCO3",
+                      "OmegaCalcite" = "OmegaCalcite",
+                      "OmegaArgonite" = "OmegaAragonite"
+                    ),
+                    selected = "CO3", multiple = FALSE,
+                    selectize = TRUE, width = NULL, size = NULL),
+          
+          # Input pair values
+          fluidRow(
+            column(5, 
+              textInput(inputId = "var1_flag9",
+                label = "pH",
+                value = 8.1
+              )
+            ),
+
+            column(6,
+              textInput(inputId = "var2_flag9",
+                label = "Dissolved inorganic C [umol/kg]",
+                value = 2155
+              )
+            )
+           ), #./fluidRow
+
+          # Plot level
+          fluidRow(
+            column(6,
+              textInput(inputId = "level_flag9",
+                label = "Plot level",
+                value = "c(4.5, seq(1,20,by=1))"
+              )
+            )
+          ) #./fluidRow
+        ), #./conditionalPanel
+
+        # CONDITIONAL CHECK FOR FLAG 21 (pCO2 and pH)
+        conditionalPanel(
+          condition = "input.flag == '21'", #exclude pCO2
+
+          # Output variable list
+          selectInput(inputId="outvar_flag21", label="Output variable", 
+                    c("H+" = "H",
+                      "CO3^2-" = "CO3",
+                      "CO2*" = "CO2",
+                      "HCO3-" = "HCO3",
+                      "OmegaCalcite" = "OmegaCalcite",
+                      "OmegaArgonite" = "OmegaAragonite"
+                    ),
+                    selected = "CO3", multiple = FALSE,
+                    selectize = TRUE, width = NULL, size = NULL),
+          
+          # Input pair values
+          fluidRow(
+            column(5, 
+              textInput(inputId = "var1_flag21",
+                label = "pCO2 [uatm]",
+                value = 330.5
+              )
+            ),
+
+            column(6,
+              textInput(inputId = "var2_flag21",
+                label = "pH",
+                value = 8.1
+              )
+            )
+           ), #./fluidRow
+          
+          # Plot level
+          fluidRow(
+            column(6,
+              textInput(inputId = "level_flag21",
+                label = "Plot level",
+                value = "c(7,seq(0,20,by=2))"
+              )
+            )
+          ) #./fluidRow
+
+        ), #./conditionalPanel
+
+        # CONDITIONAL CHECK FOR FLAG 24 (pCO2 and ALK)
+        conditionalPanel(
+          condition = "input.flag == '24'", #exclude pCO2
+
+          # Output variable list
+          selectInput(inputId="outvar_flag24", label="Output variable", 
+                    c("H+" = "H",
+                      "CO3^2-" = "CO3",
+                      "CO2*" = "CO2",
+                      "HCO3-" = "HCO3",
+                      "OmegaCalcite" = "OmegaCalcite",
+                      "OmegaArgonite" = "OmegaAragonite"
+                    ),
+                    selected = "CO3", multiple = FALSE,
+                    selectize = TRUE, width = NULL, size = NULL),
+          
+          # Input pair values
+          fluidRow(
+            column(5, 
+              textInput(inputId = "var1_flag24",
+                label = "pCO2 [uatm]",
+                value = 330.5
+              )
+            ),
+
+            column(6,
+              textInput(inputId = "var2_flag24",
+                label = "Alkalinity [umol/kg]",
+                value = 2295
+              )
+            )
+           ), #./fluidRow
+
+          # Plot level
+          fluidRow(
+            column(6,
+              textInput(inputId = "level_flag24",
+                label = "Plot level",
+                value = "seq(3,7,by=0.5)"
+              )
+            )
+          ) #./fluidRow
+        ), #./conditionalPanel
+
+        # CONDITIONAL CHECK FOR FLAG 25 (pCO2 and DIC)
+        conditionalPanel(
+          condition = "input.flag == '25'", #exclude pCO2
+
+          # Output variable list
+          selectInput(inputId="outvar_flag25", label="Output variable", 
+                    c("H+" = "H",
+                      "CO3^2-" = "CO3",
+                      "CO2*" = "CO2",
+                      "HCO3-" = "HCO3",
+                      "OmegaCalcite" = "OmegaCalcite",
+                      "OmegaArgonite" = "OmegaAragonite"
+                    ),
+                    selected = "CO3", multiple = FALSE,
+                    selectize = TRUE, width = NULL, size = NULL),
+          
+          # Input pair values
+          fluidRow(
+            column(5, 
+              textInput(inputId = "var1_flag25",
+                label = "pCO2 [uatm]",
+                value = 330.5
+              )
+            ),
+
+            column(6,
+              textInput(inputId = "var2_flag25",
+                label = "Dissolved inorganic C [umol/kg]",
+                value = 2155
+              )
+            )
+           ), #./fluidRow
+          
+          # Plot level
+          fluidRow(
+            column(6,
+              textInput(inputId = "level_flag25",
+                label = "Plot level",
+                value = "c(4.7,seq(1,20,by=1))"
+              )
+            )
+          ) #./fluidRow
+
+        ), #./conditionalPanel
+                  
+
+        textOutput("result"),
+        tags$br(),
+
+       
+        fluidRow(
+          column(3,
+            textInput(inputId = "salt",
+              label = "Salinity (psu)",
+              value = 35
+            )
+          ),
+
+           column(3,
+            textInput(inputId = "temp",
+              label = "Temperature (C)",
+              value = -0.49
+            )
+          )
+
+        ), #./fluidRow
+
+        fluidRow(
+          column(3, 
+            textInput(inputId = "pressure",
+              label = "Pressure (dbars)",
+              value = 0 #pass as dbar
+            )
+          ),
+
+          column(4,
+            textInput(inputId = "phos",
+              label = "[Phosphate] (umol/kg)",
+              value = 2  #2.e-6 mol/kg
+            )
+          ),
+
+          column(4, 
+            textInput(inputId = "sil",
+              label = "[Silicon] (umol/kg)",
+              value = 60 #60.e-6 mol/kg
+            )
+          )
+        ) #./fluidRow
+
+        # sliderInput(inputId = "evar1",
+        #   label = "Max error in first var (must be > 0):",
+        #   value = 0, min = 0, max = 20
+        # )
+
+
+      ), #./sidebarPanel
+
+      mainPanel(
+        fluidRow(
+          column( 5, plotOutput("erspace", width = "500px", height = "500px") )
+        )      
+      ) #./mainPanel
+
+      
+      
+
+    ) #./sidebarLayout
+
+
+    # tags$footer(title="Your footer here", align = "right", style = "
+    #   position:absolute;
+    #   bottom:0;
+    #   width:100%;
+    #   height:50px; /* Height of the footer */
+    #   color: white;
+    #   padding: 10px;
+    #   background-color: #f5f5f5;
+    #   z-index: 1000;"
+    # )
+
+   
+
+  ),  #./tabPanel_1
+
+  tabPanel("Help",
+
+    fluidRow(
+      column(5,
+        tags$html(
+          tags$body("To quantify errors more generally and assess the potential for improvement, 
+                  this application uses the errors routine from the ",
+                  a("seacarb package", href="https://github.com/jamesorr/seacarb-git", 
+                    target="blank"), "to construct an error-space diagram showing how 
+                  uncertainties in derived variables are affected by 
+                  the range of possible uncertainties in input variables."
+          ),
+        tags$br(),
+        tags$br(),
+        tags$body("Based on the work published by ",
+                  a("Orr et al.,", href="https://github.com/jamesorr/seacarb-git", 
+                    target="blank"), " (submitted, 2017)."
+          )
+        )
+
+      ) #./column
+    ), #./fluidRow for intro help text
+
+    tags$h3("Error-space diagram"),
+    fluidRow(
+      column(5,
+        tags$html(
+          tags$body("Error-space diagrams are contour plots that provide the propagated uncertainty 
+                    in the computed variable as a function of the range of uncertainties in each 
+                    member of the input pair, assuming total uncertainties from the equilibrium 
+                    constants given in ",
+                    a("Table 1", href="https://github.com/jamesorr/seacarb-git", 
+                    target="blank"), " of the manuscript."
+          )
+        )
+      )
+    ), #./fluidRow for FAQ1
+
+    tags$h3("Error calculation"),
+    fluidRow(
+      column(5,
+             tags$html(
+              tags$body("Estimates uncertainties in computed carbonate system variables by 
+                    propagating standard error (uncertainty) in six input variables, 
+                    including the input pair of carbonate system variables,  
+                    the two input nutrients (silicate and phosphate concentrations),  
+                    temperature and salinity, as well as the errors in the key dissociation 
+                    constants pK0, pK1, pK2, pKb, pKw, pKspa and pKspc.  "
+              ),
+              tags$br(),
+              tags$br(),
+              tags$body("Uses the ",
+                      a("'errors' function", href="https://rdrr.io/cran/seacarb/man/errors.html", 
+                        target="blank"), " function of the seacarb package."
+              )
+            ) #./html
+      ) #./column
+    ), #./fluidRow for FAQ2
+
+    HTML('<footer style="
+            position:absolute; bottom:0; width:100%; height:50px; background-color: #f5f5f5; 
+            z-index: 1000;
+          ">
+            <p class="text-muted credit">Created by
+            <a target="_blank" href="http://www.lsce.ipsl.fr/en">
+            <span title="Climate and Environment Sciences Laboratory" style="font-weight:bold;">
+            LSCE</span></a>
+            &nbsp;<a target="_blank" href="http://www.lsce.ipsl.fr/en">
+            <img src="LSCE_Icon.png" 
+            title="Climate and Environment Sciences Laboratory"/></a> 
+            
+            and hosted by <a target="_blank" href="http://www.ipsl.fr/en">
+            <span title="Institut Pierre Simon Laplace" style="font-weight:bold;">
+            IPSL</span></a>&nbsp;<a target="_blank" href="http://www.ipsl.fr/en">
+            <img src="IPSL_logo.png" title="Institut Pierre Simon Laplace"/></a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 0.1 - 2017/01/31
+            </p>
+
+            <p class="text-muted credit">
+
+        
+          </footer>'
+    )
+
+
+    #    tags$footer(title="Your footer here", align = "right", style = "
+    #   position:absolute;
+    #   bottom:0;
+    #   width:100%;
+    #   height:50px; /* Height of the footer */
+    #   color: white;
+    #   padding: 10px;
+    #   background-color: #f5f5f5;
+    #   z-index: 1000;"
+    # )
+
 
   )  #./tabPanel_2 
 
