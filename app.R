@@ -23,7 +23,7 @@ ui <- fluidPage(
                     "pH and ALK" = "8",
                     "pH and DIC" = "9",
                     "pCO2 and pH" = "21",
-                    # "pCO2 and ALK" = "24", #Error: f() values at end points not of opposite sign
+                    "pCO2 and ALK" = "24", #Error: f() values at end points not of opposite sign
                     "pCO2 and DIC" = "25"
                   ),
                   selected = "15", multiple = FALSE,
@@ -61,7 +61,18 @@ ui <- fluidPage(
               value = 2155
             )
           )
-         ) #./fluidRow
+        ), #./fluidRow
+
+        # Plot level
+        fluidRow(      
+          column(6,
+            textInput(inputId = "level_flag15",
+              label = "Plot level",
+              value = "c(1,seq(2,20,by=2))"
+            )
+          )
+        ) #./fluidRow
+
       ), #./conditionalPanel
     
       # CONDITIONAL CHECK FOR FLAG 8 (pH and ALK)
@@ -96,7 +107,18 @@ ui <- fluidPage(
               value = 2295
             )
           )
-         ) #./fluidRow
+         ), #./fluidRow
+        
+        # Plot level
+        fluidRow(
+          column(6,
+            textInput(inputId = "level_flag8",
+              label = "Plot level",
+              value = "c(4.2, seq(4,7,by=1))"
+            )
+          )
+        ) #./fluidRow
+
       ), #./conditionalPanel
     
       # CONDITIONAL CHECK FOR FLAG 9 (pH and DIC)
@@ -131,7 +153,17 @@ ui <- fluidPage(
               value = 2155
             )
           )
-         ) #./fluidRow
+         ), #./fluidRow
+
+        # Plot level
+        fluidRow(
+          column(6,
+            textInput(inputId = "level_flag9",
+              label = "Plot level",
+              value = "c(4.5, seq(1,20,by=1))"
+            )
+          )
+        ) #./fluidRow
       ), #./conditionalPanel
 
       # CONDITIONAL CHECK FOR FLAG 21 (pCO2 and pH)
@@ -165,7 +197,18 @@ ui <- fluidPage(
               value = 8.1
             )
           )
-         ) #./fluidRow
+         ), #./fluidRow
+        
+        # Plot level
+        fluidRow(
+          column(6,
+            textInput(inputId = "level_flag21",
+              label = "Plot level",
+              value = "c(7,seq(0,20,by=2))"
+            )
+          )
+        ) #./fluidRow
+
       ), #./conditionalPanel
 
       # CONDITIONAL CHECK FOR FLAG 24 (pCO2 and ALK)
@@ -199,7 +242,17 @@ ui <- fluidPage(
               value = 2295
             )
           )
-         ) #./fluidRow
+         ), #./fluidRow
+
+        # Plot level
+        fluidRow(
+          column(6,
+            textInput(inputId = "level_flag24",
+              label = "Plot level",
+              value = "seq(3,7,by=0.5)"
+            )
+          )
+        ) #./fluidRow
       ), #./conditionalPanel
 
       # CONDITIONAL CHECK FOR FLAG 25 (pCO2 and DIC)
@@ -233,7 +286,18 @@ ui <- fluidPage(
               value = 2155
             )
           )
-         ) #./fluidRow
+         ), #./fluidRow
+        
+        # Plot level
+        fluidRow(
+          column(6,
+            textInput(inputId = "level_flag25",
+              label = "Plot level",
+              value = "c(4.7,seq(1,20,by=1))"
+            )
+          )
+        ) #./fluidRow
+
       ), #./conditionalPanel
                 
 
@@ -439,7 +503,8 @@ server <- function(input, output) {
       # data arrays for plot
       xdata <- var2_e*1e+6  ;  ydata <- var1_e*1e+6
       xlim <- c(0,20)  ; ylim <- xlim
-      levels1 <- c(1,seq(2,20,by=2))
+      # levels1 <- c(1,seq(2,20,by=2))
+      levels1 <- eval(parse(text = input$level_flag15))
       xlabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
       ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
 
@@ -460,7 +525,8 @@ server <- function(input, output) {
       # for plot
       xdata <- var1_e           ;  ydata <- var2_e * 1e+6
       xlim <- c(0,0.03) ; ylim <- c(0,20) 
-      levels1 <- c(4.2, seq(4,7,by=1))
+      # levels1 <- c(4.2, seq(4,7,by=1))
+      levels1 <- eval(parse(text = input$level_flag8))
       xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
       ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
     
@@ -481,7 +547,8 @@ server <- function(input, output) {
       # for plot
       xdata <- var1_e           ;  ydata <- var2_e * 1e+6
       xlim <- c(0,0.03) ; ylim <- c(0,20) 
-      levels1 <- c(4.5, seq(1,20,by=1))
+      # levels1 <- c(4.5, seq(1,20,by=1))
+      levels1 <- eval(parse(text = input$level_flag9))
       xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
       ylabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
     
@@ -502,7 +569,8 @@ server <- function(input, output) {
       # for plot
       xdata <- var2_e           ;  ydata <- var1_e
       xlim <- c(0,0.03)  ; ylim <- c(0,20)
-      levels1 <- c(7,seq(0,20,by=2))
+      # levels1 <- c(7,seq(0,20,by=2))
+      levels1 <- eval(parse(text = input$level_flag21))
       xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
       ylabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
 
@@ -523,7 +591,8 @@ server <- function(input, output) {
       # for plot
       xdata <- var1_e ; ydata <- var2_e*1e+6
       xlim <- c(0,20)  ; ylim <- xlim
-      levels1 <- seq(3,7,by=0.5)
+      # levels1 <- seq(3,7,by=0.5)
+      levels1 <- eval(parse(text = input$level_flag24))
       xlabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
       ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
     
@@ -544,7 +613,8 @@ server <- function(input, output) {
       # for plot
       xdata <- var1_e ; ydata <- var2_e*1e+6
       xlim <- c(0,20)  ; ylim <- xlim
-      levels1 <- c(4.7,seq(1,20,by=1))
+      # levels1 <- c(4.7,seq(1,20,by=1))
+      levels1 <- eval(parse(text = input$level_flag25))
       xlabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
       ylabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
     }
