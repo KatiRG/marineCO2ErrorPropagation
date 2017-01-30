@@ -69,3 +69,8 @@ seq(7.9, 8.2, 0.05)
 pH <- seq(7.9, 8.2, 0.05)
 carb(flag=8, var1=pH, var2=2400e-6, S=35, T=25, P=0, Pt=0, Sit=0,
 	k1k2="l", kf="pf", pHscale="T")
+
+
+Navbar example
+--------------
+http://shiny.rstudio.com/gallery/navbar-example.html

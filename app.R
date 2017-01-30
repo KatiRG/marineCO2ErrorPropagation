@@ -6,14 +6,29 @@ palette(c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
 library(shiny)
 library(seacarb)
 
-ui <- fluidPage(
-  tags$h1("Interactive error-space diagram for the marine CO2 system"),
+# ui <- fluidPage(
+ui <- navbarPage("Error propagation for the marine CO2 system",
 
-  tags$p("Implements error function, allowing user to change various input values:"),
+  tabPanel("Error-space diagram",
 
-  tags$p('errors(flag, var1, var2, S=35, T=25, Patm=1, P=0, Pt=0, Sit=0, 
-              evar1=0, evar2=0, eS=0.01, eT=0.01, ePt=0, eSit=0, 
-              epK=c(0.002, 0.01, 0.02, 0.01, 0.01, 0.02, 0.02)'),
+  tags$h3("Interactive error-space diagram"),
+
+  fluidRow(
+    column(5, 
+      tags$p("Choose an input pair and change their default values if desired."),
+      tags$p("Choose the output variable to be calculated based on the input 
+              values and (modifiable) values for salinity, temperature, pressure, 
+              phosphate and silicon."),
+      tags$p("The default plot level is also modifiable.")
+
+    )
+  ), #./fluidRow for intro text
+  
+  # tags$p("Implements error function, allowing user to change various input values:"),
+
+  # tags$p('errors(flag, var1, var2, S=35, T=25, Patm=1, P=0, Pt=0, Sit=0, 
+  #             evar1=0, evar2=0, eS=0.01, eT=0.01, ePt=0, eSit=0, 
+  #             epK=c(0.002, 0.01, 0.02, 0.01, 0.01, 0.02, 0.02)'),
 
   sidebarLayout(
     sidebarPanel(
@@ -31,20 +46,7 @@ ui <- fluidPage(
 
       # CONDITIONAL CHECK FOR FLAG 15 (ALK and DIC)
       conditionalPanel(
-        condition = "input.flag == '15'", #full output var list
-
-        # Output variable list
-        selectInput(inputId="outvar_flag15", label="Output variable", 
-                  c("H+" = "H",
-                    "pCO2" = "pCO2",
-                    "CO3^2-" = "CO3",
-                    "CO2*" = "CO2",
-                    "HCO3-" = "HCO3",
-                    "OmegaCalcite" = "OmegaCalcite",
-                    "OmegaArgonite" = "OmegaAragonite"
-                  ),
-                  selected = "CO3", multiple = FALSE,
-                  selectize = TRUE, width = NULL, size = NULL),
+        condition = "input.flag == '15'", #full output var list      
         
         # Input pair values
         fluidRow(
@@ -61,10 +63,24 @@ ui <- fluidPage(
               value = 2155
             )
           )
-        ), #./fluidRow
+        ), #./fluidRow for input pair
+
+         # Output variable list
+        selectInput(inputId="outvar_flag15", label="Output variable", 
+                  c("H+" = "H",
+                    "pCO2" = "pCO2",
+                    "CO3^2-" = "CO3",
+                    "CO2*" = "CO2",
+                    "HCO3-" = "HCO3",
+                    "OmegaCalcite" = "OmegaCalcite",
+                    "OmegaArgonite" = "OmegaAragonite"
+                  ),
+                  selected = "CO3", multiple = FALSE,
+                  selectize = TRUE, width = NULL, size = NULL
+        ),
 
         # Plot level
-        fluidRow(      
+        fluidRow(
           column(6,
             textInput(inputId = "level_flag15",
               label = "Plot level",
@@ -359,19 +375,119 @@ ui <- fluidPage(
       )      
     ) #./mainPanel
 
+    
+    
 
+  ), #./sidebarLayout
+  # footer here
+  # tags$footer(
+  #   tags$p("Footer message here."), 
+  #   style = "
+  #     * {
+  #       margin: 0;
+  #     }
+  #     html, body {
+  #       height: 100%;
+  #     }
+  #     .wrapper {
+  #       min-height: 100%;
+  #       height: auto !important; /* This line and the next line are not necessary unless you need IE6 support */
+  #       height: 100%;
+  #       margin: 0 auto -155px; /* the bottom margin is the negative value of the footer's height */
+  #     }
+  #     .footer, .push {
+  #       height: 155px; /* .push must be the same height as .footer */
+  #       background-color: #f5f5f5;
+  #     }
 
-  ) #./sidebarLayout
+  #     /* Sticky Footer by Ryan Fait http://ryanfait.com/ */"
+  
+
+  # ) #./footer
+
+  tags$footer(title="Your footer here", align = "right", style = "
+    position:absolute;
+    bottom:0;
+    width:100%;
+    height:50px; /* Height of the footer */
+    color: white;
+    padding: 10px;
+    background-color: #f5f5f5;
+    z-index: 1000;"
+  )
 
  
 
+),  #./tabPanel_1
 
-) # ./fluidPage
+tabPanel("Help",
+
+  fluidRow(
+    column(5,
+      tags$html(
+        tags$body("To quantify errors more generally and assess the potential for improvement, 
+                this application uses the errors routine from the ",
+                a("seacarb package", href="https://github.com/jamesorr/seacarb-git", 
+                  target="blank"), "to construct an error-space diagram showing how 
+                uncertainties in derived variables are affected by 
+                the range of possible uncertainties in input variables."
+        ),
+      tags$br(),
+      tags$br(),
+      tags$body("Based on the work published by ",
+                a("Orr et al.,", href="https://github.com/jamesorr/seacarb-git", 
+                  target="blank"), " (submitted, 2017)."
+        )
+      )
+
+    ) #./column
+  ), #./fluidRow for intro help text
+
+  tags$h3("Error-space diagram"),
+  fluidRow(
+    column(5,
+      tags$html(
+        tags$body("Error-space diagrams are contour plots that provide the propagated uncertainty 
+                  in the computed variable as a function of the range of uncertainties in each 
+                  member of the input pair, assuming total uncertainties from the equilibrium 
+                  constants given in ",
+                  a("Table 1", href="https://github.com/jamesorr/seacarb-git", 
+                  target="blank"), " of the manuscript."
+        )
+      )
+    )
+  ), #./fluidRow for FAQ1
+
+  tags$h3("Error calculation"),
+  fluidRow(
+    column(5,
+           tags$html(
+            tags$body("Estimates uncertainties in computed carbonate system variables by 
+                  propagating standard error (uncertainty) in six input variables, 
+                  including the input pair of carbonate system variables,  
+                  the two input nutrients (silicate and phosphate concentrations),  
+                  temperature and salinity, as well as the errors in the key dissociation 
+                  constants pK0, pK1, pK2, pKb, pKw, pKspa and pKspc.  "
+            ),
+            tags$br(),
+            tags$br(),
+            tags$body("Uses the ",
+                    a("'errors' function", href="https://rdrr.io/cran/seacarb/man/errors.html", 
+                      target="blank"), " function of the seacarb package."
+            )
+          ) #./html
+    ) #./column
+  ) #./fluidRow for FAQ2
+
+  )  #./tabPanel_2 
+
+
+) #./navbarPage    ### ./fluidPage
 
 server <- function(input, output) {
-  output$result <- renderText({
-    paste("flag value:", input$flag)
-  })
+  # output$result <- renderText({
+  #   paste("flag value:", input$flag)
+  # })
 
   # ===================================================================
   # Define function sources
@@ -761,28 +877,6 @@ server <- function(input, output) {
     # et: Warning in sqrt(0.5 * (sigmay^2 - eKall^2)/dd2^2) : production de NaN
 
     # Add scale factors if necessary
-    # if (menu_flag == 15 ) {
-    #   sig1   <- data.frame(errcirc[1]) * 1e+6
-    #   sig2   <- data.frame(errcirc[2]) * 1e+6
-
-    #   sigm1   <- data.frame(errm[1]) * 1e+6
-    #   sigm2   <- data.frame(errm[2]) * 1e+6
-
-    # } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 24 || menu_flag == 25) {
-    #   sig1   <- data.frame(errcirc[1])
-    #   sig2   <- data.frame(errcirc[2]) * 1e+6
-
-    #   sigm1   <- data.frame(errm[1])
-    #   sigm2   <- data.frame(errm[2]) * 1e+6
- 
-    # } else if (menu_flag == 21) {
-    #   sig1   <- data.frame(errcirc[1])
-    #   sig2   <- data.frame(errcirc[2])
-
-    #   sigm1   <- data.frame(errm[1])
-    #   sigm2   <- data.frame(errm[2])
-    # }
-
     sig1   <- data.frame(errcirc[1]) * scalefactor1
     sig2   <- data.frame(errcirc[2]) * scalefactor2
         
