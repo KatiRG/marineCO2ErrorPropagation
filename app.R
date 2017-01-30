@@ -379,20 +379,33 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
       
       
 
-    ) #./sidebarLayout
+    ), #./sidebarLayout
 
 
-    # tags$footer(title="Your footer here", align = "right", style = "
-    #   position:absolute;
-    #   bottom:0;
-    #   width:100%;
-    #   height:50px; /* Height of the footer */
-    #   color: white;
-    #   padding: 10px;
-    #   background-color: #f5f5f5;
-    #   z-index: 1000;"
-    # )
+    HTML('<footer style="
+            position:absolute; bottom:0; width:100%; height:50px; background-color: #f5f5f5; 
+            z-index: 1000;
+          ">
+            <p class="text-muted credit" style="margin:10px 0;">Created by
+            <a target="_blank" href="http://www.lsce.ipsl.fr/en">
+            <span title="Climate and Environment Sciences Laboratory" style="font-weight:bold;">
+            LSCE</span></a>
+            &nbsp;<a target="_blank" href="http://www.lsce.ipsl.fr/en">
+            <img src="LSCE_Icon.png" 
+            title="Climate and Environment Sciences Laboratory"/></a> 
+            
+            and hosted by <a target="_blank" href="http://www.ipsl.fr/en">
+            <span title="Institut Pierre Simon Laplace" style="font-weight:bold;">
+            IPSL</span></a>&nbsp;<a target="_blank" href="http://www.ipsl.fr/en">
+            <img src="IPSL_logo.png" title="Institut Pierre Simon Laplace"/></a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 0.1 - 2017/01/31
+            </p>
 
+            <p class="text-muted credit">
+
+        
+          </footer>'
+    )
    
 
   ),  #./tabPanel_1
@@ -460,7 +473,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
             position:absolute; bottom:0; width:100%; height:50px; background-color: #f5f5f5; 
             z-index: 1000;
           ">
-            <p class="text-muted credit">Created by
+            <p class="text-muted credit" style="margin:10px 0;">Created by
             <a target="_blank" href="http://www.lsce.ipsl.fr/en">
             <span title="Climate and Environment Sciences Laboratory" style="font-weight:bold;">
             LSCE</span></a>
@@ -480,19 +493,6 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
         
           </footer>'
     )
-
-
-    #    tags$footer(title="Your footer here", align = "right", style = "
-    #   position:absolute;
-    #   bottom:0;
-    #   width:100%;
-    #   height:50px; /* Height of the footer */
-    #   color: white;
-    #   padding: 10px;
-    #   background-color: #f5f5f5;
-    #   z-index: 1000;"
-    # )
-
 
   )  #./tabPanel_2 
 
