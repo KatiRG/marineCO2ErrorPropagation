@@ -171,7 +171,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
               condition = "input.refPt_flag8 == true",
               textInput(inputId = "refPt2_flag8",
                 label = "Alkalinity [umol/kg]",
-                value = "c(0.003, 0.010)")
+                value = 2)
               ) #./inner conditionalPanel
             ) #./column
           ) #./fluidRow refPt
@@ -285,7 +285,27 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
                 value = "c(7,seq(0,20,by=2))"
               )
             )
-          ) #./fluidRow
+          ), #./fluidRow
+
+          # Reference point
+          fluidRow(
+            column(3, checkboxInput("refPt_flag21", "Edit ref. point ") ),
+            column(4, conditionalPanel(
+              condition = "input.refPt_flag21 == true",
+              textInput(inputId = "refPt1_flag21",
+                label = "pCO2 [uatm]",
+                value = 2)
+              ) #./inner conditionalPanel
+            ), #./column
+
+            column(5,conditionalPanel(
+              condition = "input.refPt_flag21 == true",
+              textInput(inputId = "refPt2_flag21",
+                label = "pH",
+                value = "c(0.003, 0.010)")
+              ) #./inner conditionalPanel
+            ) #./column
+          ) #./fluidRow refPt
 
         ), #./conditionalPanel
 
@@ -330,7 +350,28 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
                 value = "seq(3,7,by=0.5)"
               )
             )
-          ) #./fluidRow
+          ), #./fluidRow
+
+          # Reference point
+          fluidRow(
+            column(3, checkboxInput("refPt_flag24", "Edit ref. point ") ),
+            column(4, conditionalPanel(
+              condition = "input.refPt_flag24 == true",
+              textInput(inputId = "refPt1_flag24",
+                label = "pCO2 [uatm]",
+                value = 2)
+              ) #./inner conditionalPanel
+            ), #./column
+
+            column(5,conditionalPanel(
+              condition = "input.refPt_flag24 == true",
+              textInput(inputId = "refPt2_flag24",
+                label = "Alkalinity [umol/kg]",
+                value = 2)
+              ) #./inner conditionalPanel
+            ) #./column
+          ) #./fluidRow refPt
+
         ), #./conditionalPanel
 
         # CONDITIONAL CHECK FOR FLAG 25 (pCO2 and DIC)
@@ -374,7 +415,27 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
                 value = "c(4.7,seq(1,20,by=1))"
               )
             )
-          ) #./fluidRow
+          ), #./fluidRow
+
+          # Reference point
+          fluidRow(
+            column(3, checkboxInput("refPt_flag25", "Edit ref. point ") ),
+            column(4, conditionalPanel(
+              condition = "input.refPt_flag25 == true",
+              textInput(inputId = "refPt1_flag25",
+                label = "pCO2 [uatm]",
+                value = 2)
+              ) #./inner conditionalPanel
+            ), #./column
+
+            column(5,conditionalPanel(
+              condition = "input.refPt_flag25 == true",
+              textInput(inputId = "refPt2_flag25",
+                label = "Dissolved inorg C [umol/kg]",
+                value = 2)
+              ) #./inner conditionalPanel
+            ) #./column
+          ) #./fluidRow refPt
 
         ), #./conditionalPanel
                   
@@ -796,7 +857,7 @@ server <- function(input, output) {
       # Edit soa2 value if modified by user
       if(input$refPt_flag8) { #Edit ref pt checkbox has been selected
         var1_e_soa2  <- eval(parse(text = input$refPt1_flag8))
-        var2_e_soa2  <- eval(parse(text = input$refPt2_flag8))
+        var2_e_soa2  <- c( as.numeric(input$refPt2_flag8), as.numeric(input$refPt2_flag8) )
       } else {
         var1_e_soa2  <- var1_e_soa
         var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
@@ -859,8 +920,14 @@ server <- function(input, output) {
       var1_e_soa   <- 2
       var2_e_soa   <- c(0.003, 0.01)
       
-      var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
-      var2_e_soa2  <- var2_e_soa
+      # Edit soa2 value if modified by user
+      if(input$refPt_flag21) { #Edit ref pt checkbox has been selected
+        var1_e_soa2  <- c( as.numeric(input$refPt1_flag21), as.numeric(input$refPt1_flag21) )
+        var2_e_soa2  <- eval(parse(text = input$refPt2_flag21))
+      } else {
+        var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
+        var2_e_soa2  <- var2_e_soa
+      }
       
       # for plot
       xdata <- var2_e           ;  ydata <- var1_e
@@ -886,8 +953,14 @@ server <- function(input, output) {
       var1_e_soa   <- 2
       var2_e_soa   <- 2
       
-      var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
-      var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+      # Edit soa2 value if modified by user
+      if(input$refPt_flag24) { #Edit ref pt checkbox has been selected    
+        var1_e_soa2  <- as.numeric(input$refPt1_flag24)
+        var2_e_soa2  <- as.numeric(input$refPt2_flag24)
+      } else {
+        var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
+        var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+      }
       
       # for plot
       xdata <- var1_e ; ydata <- var2_e*1e+6
@@ -913,8 +986,14 @@ server <- function(input, output) {
       var1_e_soa   <- 2
       var2_e_soa   <- 2
       
-      var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
-      var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+      # Edit soa2 value if modified by user
+      if(input$refPt_flag25) { #Edit ref pt checkbox has been selected    
+        var1_e_soa2  <- as.numeric(input$refPt1_flag25)
+        var2_e_soa2  <- as.numeric(input$refPt2_flag25)
+      } else {
+        var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
+        var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+      }
       
       # for plot
       xdata <- var1_e ; ydata <- var2_e*1e+6
