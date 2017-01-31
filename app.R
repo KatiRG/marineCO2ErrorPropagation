@@ -640,19 +640,20 @@ server <- function(input, output) {
   #----------------------------------------------------------------------
   #Reactive elements
   # Scales
-  # varScales <- reactive({
-  #   maxlim = 20 #max of scale for all except pH
-  #   redn = 0.5 #reduce resolution by 50%
-  # })
+  varScales <- reactive({
+    maxlim = 20 #max of scale for all except pH
+    redn = 0.5 #reduce resolution by 50%
+
+    list("maxlim" = maxlim,
+         "redn" = redn
+        )
+  })
 
   # Get input vars and define the associated quantities
   varSet1 <- reactive({
-    # print("varScales():")
-    # print(varScales())
-    # print(varScales()[["maxlim"]])
 
-    maxlim = 20 #varScales()[["maxlim"]]
-    redn = 0.5 #varScales()[["redn"]]
+    maxlim = varScales()[["maxlim"]]
+    redn = varScales()[["redn"]]
 
     menu_flag <- as.numeric(input$flag)
     menu_salt <- as.numeric(input$salt)
@@ -707,34 +708,167 @@ server <- function(input, output) {
       xlabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
       ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
 
-    }
+    } else if (input$flag == "8") { #var1=pH, var2=ALK
+      menu_var1 <- as.numeric(input$var1_flag8)
+      menu_var2 <- as.numeric(input$var2_flag8) * 1e-6 #convert umol/kg to mol/kg
+
+      # Scale factor for sig, sigm
+      scalefactor1 = 1 #pH
+      scalefactor2 = 1e+6 #ALK
+      
+      # Uncertainties in input variables
+      # NB: length of these arrays defines the resolution of the grid
+      var1_e <- seq(0,0.03,0.0015/redn)
+      var2_e <- seq(0., maxlim, 1/redn) * 1e-6
+      
+      var1_e_soa   <- c(0.003, 0.01) #pH
+      var2_e_soa   <- 2 #umol/kg
+      
+      var1_e_soa2  <- var1_e_soa
+      var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+      
+      # for plot
+      xdata <- var1_e           ;  ydata <- var2_e * 1e+6
+      xlim <- c(0,0.03) ; ylim <- c(0,maxlim) 
+      # levels1 <- c(4.2, seq(4,7,by=1))
+      levels1 <- eval(parse(text = input$level_flag8))
+      xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
+      ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
+
+    } else if (input$flag == "9") { #var1=pH, var2=DIC
+      menu_var1 <- as.numeric(input$var1_flag9)
+      menu_var2 <- as.numeric(input$var2_flag9) * 1e-6 #convert umol/kg to mol/kg
+
+      # Scale factor for sig, sigm
+      scalefactor1 = 1 #pH
+      scalefactor2 = 1e+6 #DIC
+      
+      # Uncertainties in input variables
+      # NB: length of these arrays defines the resolution of the grid
+      var1_e <- seq(0,0.03,0.0015/redn)
+      var2_e <- seq(0., maxlim, 1/redn) * 1e-6
+      
+      var1_e_soa   <- c(0.003, 0.01) #pH
+      var2_e_soa   <- 2 #umol/kg
+      
+      var1_e_soa2  <- var1_e_soa
+      var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+      
+      # for plot
+      xdata <- var1_e           ;  ydata <- var2_e * 1e+6
+      xlim <- c(0,0.03) ; ylim <- c(0,maxlim) 
+      # levels1 <- c(4.5, seq(1,20,by=1))
+      levels1 <- eval(parse(text = input$level_flag9))
+      xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
+      ylabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
+    
+    } else if (input$flag == "21") { #var1=pCO2, var2=pH
+      menu_var1 <- as.numeric(input$var1_flag21)
+      menu_var2 <- as.numeric(input$var2_flag21)
+      
+      # Scale factor for sig, sigm
+      scalefactor1 = 1 #pCO2
+      scalefactor2 = 1 #pH
+
+      # Uncertainties in input variables
+      # NB: length of these arrays defines the resolution of the grid
+      var1_e <- seq(0,maxlim,1/redn)
+      var2_e <- seq(0,0.03,0.0015/redn)
+      
+      var1_e_soa   <- 2
+      var2_e_soa   <- c(0.003, 0.01)
+      
+      var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
+      var2_e_soa2  <- var2_e_soa
+      
+      # for plot
+      xdata <- var2_e           ;  ydata <- var1_e
+      xlim <- c(0,0.03)  ; ylim <- c(0,maxlim)
+      # levels1 <- c(7,seq(0,20,by=2))
+      levels1 <- eval(parse(text = input$level_flag21))
+      xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
+      ylabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
+
+    } else if (input$flag == "24") { #var1=pCO2, var2=ALK
+      menu_var1 <- as.numeric(input$var1_flag24)
+      menu_var2 <- as.numeric(input$var2_flag24) * 1e-6 #convert umol/kg to mol/kg
+
+      # Scale factor for sig, sigm
+      scalefactor1 = 1 #pCO2
+      scalefactor2 = 1e+6 #ALK
+      
+      # Uncertainties in input variables
+      # NB: length of these arrays defines the resolution of the grid
+      var1_e <- seq(0,maxlim,1/redn)
+      var2_e <- seq(0., maxlim, 1/redn) * 1e-6
+      
+      var1_e_soa   <- 2
+      var2_e_soa   <- 2
+      
+      var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
+      var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+      
+      # for plot
+      xdata <- var1_e ; ydata <- var2_e*1e+6
+      xlim <- c(0,maxlim)  ; ylim <- xlim
+      # levels1 <- seq(3,7,by=0.5)
+      levels1 <- eval(parse(text = input$level_flag24))
+      xlabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
+      ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
+    
+    } else if (input$flag == "25") { #var1=pCO2, var2=DIC
+      menu_var1 <- as.numeric(input$var1_flag25)
+      menu_var2 <- as.numeric(input$var2_flag25)* 1e-6 #convert umol/kg to mol/kg
+
+      # Scale factor for sig, sigm
+      scalefactor1 = 1 #pCO2
+      scalefactor2 = 1e+6 #DIC
+      
+      # Uncertainties in input variables
+      # NB: length of these arrays defines the resolution of the grid
+      var1_e <- seq(0,maxlim,1/redn)
+      var2_e <- seq(0., maxlim, 1/redn) * 1e-6
+      
+      var1_e_soa   <- 2
+      var2_e_soa   <- 2
+      
+      var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
+      var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+      
+      # for plot
+      xdata <- var1_e ; ydata <- var2_e*1e+6
+      xlim <- c(0,maxlim)  ; ylim <- xlim
+      # levels1 <- c(4.7,seq(1,20,by=1))
+      levels1 <- eval(parse(text = input$level_flag25))
+      xlabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
+      ylabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
+    }  
 
     list("menu_flag" = menu_flag,
-                "menu_salt" = menu_salt,
-                "menu_temp" = menu_temp,
-                "menu_pressure" = menu_pressure,
-                "menu_phos" = menu_phos,
-                "menu_sil" = menu_sil,
-                "menu_outvar" = menu_outvar,
-                "menu_var1" = menu_var1,
-                "menu_var2" = menu_var2,
-                "scalefactor1" = scalefactor1,
-                "scalefactor2" = scalefactor2,
-                "var1_e" = var1_e,
-                "var2_e" = var2_e,
-                "var1_e_soa" = var1_e_soa,
-                "var2_e_soa" = var2_e_soa,
-                "var1_e_soa2" = var1_e_soa2,
-                "var2_e_soa2" = var2_e_soa2,
-                "xdata" = xdata,
-                "ydata" = ydata,
-                "xlim" = xlim,
-                "ylim" = ylim,
-                "levels1" = levels1,
-                "xlabel" = xlabel,
-                "ylabel" = ylabel
-              )
-        # )
+          "menu_salt" = menu_salt,
+          "menu_temp" = menu_temp,
+          "menu_pressure" = menu_pressure,
+          "menu_phos" = menu_phos,
+          "menu_sil" = menu_sil,
+          "menu_outvar" = menu_outvar,
+          "menu_var1" = menu_var1,
+          "menu_var2" = menu_var2,
+          "scalefactor1" = scalefactor1,
+          "scalefactor2" = scalefactor2,
+          "var1_e" = var1_e,
+          "var2_e" = var2_e,
+          "var1_e_soa" = var1_e_soa,
+          "var2_e_soa" = var2_e_soa,
+          "var1_e_soa2" = var1_e_soa2,
+          "var2_e_soa2" = var2_e_soa2,
+          "xdata" = xdata,
+          "ydata" = ydata,
+          "xlim" = xlim,
+          "ylim" = ylim,
+          "levels1" = levels1,
+          "xlabel" = xlabel,
+          "ylabel" = ylabel
+        )
   }) #./varSet1
 
   #----------------------------------------------------------------------
@@ -839,8 +973,8 @@ server <- function(input, output) {
   # Compute other parts of error-space diagrams
   varErr <- reactive({
 
-    maxlim = 20 #varScales()[["maxlim"]]
-    redn = 0.5 #varScales()[["redn"]]
+    maxlim = varScales()[["maxlim"]]
+    redn = varScales()[["redn"]]
     scalefactor1 = varSet1()[["scalefactor1"]]
     scalefactor2 = varSet1()[["scalefactor2"]]
 
@@ -896,10 +1030,9 @@ server <- function(input, output) {
   # ---------------------------------------------------------------------
   # Render plot
   output$erspace <- renderPlot({
-    # maxlim = varScales()[["maxlim"]]
-    # redn = varScales()[["redn"]]
-    maxlim = 20 #varScales()[["maxlim"]]
-    redn = 0.5 #varScales()[["redn"]]
+    
+    maxlim = varScales()[["maxlim"]]
+    redn = varScales()[["redn"]]
 
     # Outputs from varSet1 (user inputs)
     menu_flag <- varSet1()[["menu_flag"]]
@@ -991,8 +1124,8 @@ server <- function(input, output) {
       print(file)
         
       # Vars needed to make plot (must be reactive otherwise can't read them)
-      maxlim = 20 #varScales()[["maxlim"]]
-      redn = 0.5 #varScales()[["redn"]]
+      maxlim = varScales()[["maxlim"]]
+      redn = varScales()[["redn"]]
 
       # Outputs from varSet1 (user inputs)
       menu_flag <- varSet1()[["menu_flag"]]
