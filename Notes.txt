@@ -1,9 +1,11 @@
 Notes
 =====
 
-Install shiny:
+Install shiny: https://shiny.rstudio.com/tutorial/lesson1/
 --------------
-open an R session, connect to the internet, and run. > install.packages("shiny")
+open an R session, connect to the internet, and run
+
+$ install.packages("shiny")
 
 Run app.R:
 ----------
@@ -79,3 +81,10 @@ Footer
 ------
 https://gist.github.com/sckott/5694313
 http://stackoverflow.com/questions/37113739/shiny-dashboard-sticky-footer-in-dashboardsidebar
+
+Save plot
+---------
+https://www.youtube.com/watch?v=LSnWGmVkB6A
+-> https://github.com/aagarw30/R-Shinyapp-Tutorial/tree/master/how%20to%20download%20plot
+--> https://github.com/aagarw30/R-Shinyapp-Tutorial/blob/master/how%20to%20download%20plot/ui.R,
+    https://github.com/aagarw30/R-Shinyapp-Tutorial/blob/master/how%20to%20download%20plot/server.R
