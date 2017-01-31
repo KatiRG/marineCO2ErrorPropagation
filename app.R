@@ -577,8 +577,8 @@ server <- function(input, output) {
   # Default uncertainties in equilibrium constants 
   # (pK0, pK1, pK2, pKb, pKw, pKa, pKc, Bt)
   # ------------------------------------------------
-  epKstd  <- c(0.004, 0.015,  0.03, 0.01,  0.01, 0.02, 0.02, 0.01)
-
+  # epKstd  <- c(0.004, 0.015,  0.03, 0.01,  0.01, 0.02, 0.02, 0.01)
+  epKstd  <- c(0.002, 0.01,  0.02, 0.01,  0.01, 0.01, 0.01, 0.00)
 
 
   # ===================================================================
@@ -972,7 +972,7 @@ server <- function(input, output) {
     
     za <- er_outvar
 
-    if (menu_flag == 15 || menu_flag == 21) {
+    if (menu_flag == 15) {
       sigcritXa <- sig2[[menu_outvar]]  ;  sigcritYa <- sig1[[menu_outvar]]  #xdata; ydata
 
       plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,                     
@@ -990,18 +990,22 @@ server <- function(input, output) {
                      var1_e_soa2, var2_e_soa2,
                      xdata, ydata, za, levels1,
                      'flattest')      
+    } else if (menu_flag == 21) {
+      za <- t(za)      
+      sigcritXa <- sig2[[menu_outvar]]  ;  sigcritYa <- sig1[[menu_outvar]]  #xdata; ydata
+
+      plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,                     
+                     NULL, NULL,
+                     zenon(sigm2[[menu_outvar]]), zenon(sigm1[[menu_outvar]]),
+                     var2_e_soa2, var1_e_soa2,
+                     xdata, ydata, za, levels1,
+                     'flattest')      
     }
 
-    # print("sigm2:")
-    # print(sigm2[[menu_outvar]])
-    # print("sigm1:")
-    # print(sigm1[[menu_outvar]])
+
+  }) #./renderPlot
 
 
-  })
-
-
-
-}
+} #./server
 
 shinyApp(ui = ui, server = server)
