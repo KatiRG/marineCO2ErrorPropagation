@@ -82,12 +82,35 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
 
           # Contour level
           fluidRow(
-            column(6,
+            column(4,
               textInput(inputId = "level_flag15",
                 label = "Contour level",
                 value = "c(1,seq(2,20,by=1))"
               )
+            ) #./column
+          ), #./fluidRow
+
+          # Reference point
+          fluidRow(
+            column(3, checkboxInput("refPt", "Edit ref. point ") ),
+            column(4, conditionalPanel(
+              condition = "input.refPt == true",
+              textInput(inputId = "refPt1_flag15",
+              label = "Alkalinity [umol/kg]",
+              value = 2)
+            ) #./inner conditionalPanel
+            ),
+
+            column(5,conditionalPanel(
+              condition = "input.refPt == true",
+              textInput(inputId = "refPt2_flag15",
+              label = "Dissolved inorg C [umol/kg]",
+              value = 2)
+            ) #./inner conditionalPanel
             )
+           
+          
+
           ) #./fluidRow
 
         ), #./conditionalPanel
