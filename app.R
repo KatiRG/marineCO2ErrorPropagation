@@ -641,46 +641,21 @@ server <- function(input, output) {
   }
   #----------------------------------------------------------------------
   #Reactive elements
-   varSet1 <- reactive({
-    my_flag <- as.numeric(input$flag)
+  # Scales
+  # varScales <- reactive({
+  #   maxlim = 20 #max of scale for all except pH
+  #   redn = 0.5 #reduce resolution by 50%
+  # })
 
-    myc_outvar <- reactive({switch(
-      input$flag,
-      "1" = as.character(input$outvar_flag1),
-      "8" = as.character(input$outvar_flag8),  #full list
-      "9" = as.character(input$outvar_flag9),  #full list
-      "15" = as.character(input$outvar_flag15),  #full list
-      "21" = as.character(input$outvar_flag21),  #exclude pCO2
-      "24" = as.character(input$outvar_flag24),  #exclude pCO2
-      "25" = as.character(input$outvar_flag25)  #exclude pCO2
-    )})
-    my_outvar <- myc_outvar()
+  # Get input vars and define the associated quantities
+  varSet1 <- reactive({
+    # print("varScales():")
+    # print(varScales())
+    # print(varScales()[["maxlim"]])
 
-    if (input$flag == "15") { #var1=ALK, var2=DIC
-      my_var1 <- as.numeric(input$var1_flag15) * 1e-6 #convert umol/kg to mol/kg
-    }
+    maxlim = 20 #varScales()[["maxlim"]]
+    redn = 0.5 #varScales()[["redn"]]
 
-    unlist(list("my_outvar" = my_outvar,        
-                "my_var1" = my_var1))
-  }) #./varSet1
-
-  # ---------------------------------------------------------------------
-  # Calculate and render plot based on user selections
-  output$erspace <- renderPlot({
-    print("varSet():")
-    print(varSet1())
-    print(varSet1()[["my_outvar"]])
-
-    maxlim = 20
-    redn = 0.5 #reduce resolution by 50%
-
-    # ===================================================================
-    # Define input vars and their uncertainties
-    # Specify flag & corresponding 2 input variables
-
-    # Input variables:
-    # ----------------
-    # Approximate regional mean for Southern Ocean (c.f. Fig. 3.2 [Orr, 2011])
     menu_flag <- as.numeric(input$flag)
     menu_salt <- as.numeric(input$salt)
     menu_temp <- as.numeric(input$temp)
@@ -700,8 +675,6 @@ server <- function(input, output) {
       "25" = as.character(input$outvar_flag25)  #exclude pCO2
     )})
     menu_outvar <- conditional_outvar()
-    print("menu_outvar:")
-    print(menu_outvar)
 
     # CONDITIONAL CHECK OVER ALL INPUT FLAGS TO DEFINE:
     # var1, var1_e, var1_e_soa, var1_e_soa2
@@ -736,150 +709,270 @@ server <- function(input, output) {
       xlabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
       ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
 
-    } else if (input$flag == "8") { #var1=pH, var2=ALK
-      menu_var1 <- as.numeric(input$var1_flag8)
-      menu_var2 <- as.numeric(input$var2_flag8) * 1e-6 #convert umol/kg to mol/kg
-
-      # Scale factor for sig, sigm
-      scalefactor1 = 1 #pH
-      scalefactor2 = 1e+6 #ALK
-      
-      # Uncertainties in input variables
-      # NB: length of these arrays defines the resolution of the grid
-      var1_e <- seq(0,0.03,0.0015/redn)
-      var2_e <- seq(0., maxlim, 1/redn) * 1e-6
-      
-      var1_e_soa   <- c(0.003, 0.01) #pH
-      var2_e_soa   <- 2 #umol/kg
-      
-      var1_e_soa2  <- var1_e_soa
-      var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
-      
-      # for plot
-      xdata <- var1_e           ;  ydata <- var2_e * 1e+6
-      xlim <- c(0,0.03) ; ylim <- c(0,maxlim) 
-      # levels1 <- c(4.2, seq(4,7,by=1))
-      levels1 <- eval(parse(text = input$level_flag8))
-      xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
-      ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
-    
-    } else if (input$flag == "9") { #var1=pH, var2=DIC
-      menu_var1 <- as.numeric(input$var1_flag9)
-      menu_var2 <- as.numeric(input$var2_flag9) * 1e-6 #convert umol/kg to mol/kg
-
-      # Scale factor for sig, sigm
-      scalefactor1 = 1 #pH
-      scalefactor2 = 1e+6 #DIC
-      
-      # Uncertainties in input variables
-      # NB: length of these arrays defines the resolution of the grid
-      var1_e <- seq(0,0.03,0.0015/redn)
-      var2_e <- seq(0., maxlim, 1/redn) * 1e-6
-      
-      var1_e_soa   <- c(0.003, 0.01) #pH
-      var2_e_soa   <- 2 #umol/kg
-      
-      var1_e_soa2  <- var1_e_soa
-      var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
-      
-      # for plot
-      xdata <- var1_e           ;  ydata <- var2_e * 1e+6
-      xlim <- c(0,0.03) ; ylim <- c(0,maxlim) 
-      # levels1 <- c(4.5, seq(1,20,by=1))
-      levels1 <- eval(parse(text = input$level_flag9))
-      xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
-      ylabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
-    
-    } else if (input$flag == "21") { #var1=pCO2, var2=pH
-      menu_var1 <- as.numeric(input$var1_flag21)
-      menu_var2 <- as.numeric(input$var2_flag21)
-      
-      # Scale factor for sig, sigm
-      scalefactor1 = 1 #pCO2
-      scalefactor2 = 1 #pH
-
-      # Uncertainties in input variables
-      # NB: length of these arrays defines the resolution of the grid
-      var1_e <- seq(0,maxlim,1/redn)
-      var2_e <- seq(0,0.03,0.0015/redn)
-      
-      var1_e_soa   <- 2
-      var2_e_soa   <- c(0.003, 0.01)
-      
-      var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
-      var2_e_soa2  <- var2_e_soa
-      
-      # for plot
-      xdata <- var2_e           ;  ydata <- var1_e
-      xlim <- c(0,0.03)  ; ylim <- c(0,maxlim)
-      # levels1 <- c(7,seq(0,20,by=2))
-      levels1 <- eval(parse(text = input$level_flag21))
-      xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
-      ylabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
-
-    } else if (input$flag == "24") { #var1=pCO2, var2=ALK
-      menu_var1 <- as.numeric(input$var1_flag24)
-      menu_var2 <- as.numeric(input$var2_flag24) * 1e-6 #convert umol/kg to mol/kg
-
-      # Scale factor for sig, sigm
-      scalefactor1 = 1 #pCO2
-      scalefactor2 = 1e+6 #ALK
-      
-      # Uncertainties in input variables
-      # NB: length of these arrays defines the resolution of the grid
-      var1_e <- seq(0,maxlim,1/redn)
-      var2_e <- seq(0., maxlim, 1/redn) * 1e-6
-      
-      var1_e_soa   <- 2
-      var2_e_soa   <- 2
-      
-      var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
-      var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
-      
-      # for plot
-      xdata <- var1_e ; ydata <- var2_e*1e+6
-      xlim <- c(0,maxlim)  ; ylim <- xlim
-      # levels1 <- seq(3,7,by=0.5)
-      levels1 <- eval(parse(text = input$level_flag24))
-      xlabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
-      ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
-    
-    } else if (input$flag == "25") { #var1=pCO2, var2=DIC
-      menu_var1 <- as.numeric(input$var1_flag25)
-      menu_var2 <- as.numeric(input$var2_flag25)* 1e-6 #convert umol/kg to mol/kg
-
-      # Scale factor for sig, sigm
-      scalefactor1 = 1 #pCO2
-      scalefactor2 = 1e+6 #DIC
-      
-      # Uncertainties in input variables
-      # NB: length of these arrays defines the resolution of the grid
-      var1_e <- seq(0,maxlim,1/redn)
-      var2_e <- seq(0., maxlim, 1/redn) * 1e-6
-      
-      var1_e_soa   <- 2
-      var2_e_soa   <- 2
-      
-      var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
-      var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
-      
-      # for plot
-      xdata <- var1_e ; ydata <- var2_e*1e+6
-      xlim <- c(0,maxlim)  ; ylim <- xlim
-      # levels1 <- c(4.7,seq(1,20,by=1))
-      levels1 <- eval(parse(text = input$level_flag25))
-      xlabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
-      ylabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
     }
+
+    list("menu_flag" = menu_flag,
+                "menu_salt" = menu_salt,
+                "menu_temp" = menu_temp,
+                "menu_pressure" = menu_pressure,
+                "menu_phos" = menu_phos,
+                "menu_sil" = menu_sil,
+                "menu_outvar" = menu_outvar,
+                "menu_var1" = menu_var1,
+                "menu_var2" = menu_var2,
+                "scalefactor1" = scalefactor1,
+                "scalefactor2" = scalefactor2,
+                "var1_e" = var1_e,
+                "var2_e" = var2_e,
+                "var1_e_soa" = var1_e_soa,
+                "var2_e_soa" = var2_e_soa,
+                "var1_e_soa2" = var1_e_soa2,
+                "var2_e_soa2" = var2_e_soa2,
+                "xdata" = xdata,
+                "ydata" = ydata,
+                "xlim" = xlim,
+                "ylim" = ylim,
+                "levels1" = levels1,
+                "xlabel" = xlabel,
+                "ylabel" = ylabel
+              )
+        # )
+  }) #./varSet1
+
+  # ---------------------------------------------------------------------
+  # Calculate and render plot based on user selections
+  output$erspace <- renderPlot({
+    # maxlim = varScales()[["maxlim"]]
+    # redn = varScales()[["redn"]]
+    maxlim = 20 #varScales()[["maxlim"]]
+    redn = 0.5 #varScales()[["redn"]]
+
+    print("varSet1():")
+    print(varSet1())
+
+    print("varSet1()[[var1_e]]:")
+    print( varSet1()[["var1_e"]] )
+    print("length:")
+    print( length(varSet1()[["var1_e"]]) )
+
+    menu_flag <- varSet1()[["menu_flag"]]
+    menu_salt <- varSet1()[["menu_salt"]]
+    menu_temp <- varSet1()[["menu_temp"]]
+    menu_pressure <- varSet1()[["menu_pressure"]]
+    menu_phos <- varSet1()[["menu_phos"]]
+    menu_sil <- varSet1()[["menu_sil"]]
+
+    menu_outvar <- varSet1()[["menu_outvar"]]
+    menu_var1 <- varSet1()[["menu_var1"]]
+    menu_var2 <- varSet1()[["menu_var2"]]
+    scalefactor1 = varSet1()[["scalefactor1"]]
+    scalefactor2 = varSet1()[["scalefactor2"]]
+
+    var1_e <- varSet1()[["var1_e"]]
+    var2_e <- varSet1()[["var2_e"]]
+    print("var1_e")
+    print(var1_e)
+
+    var1_e_soa <- varSet1()[["var1_e_soa"]]
+    var2_e_soa <- varSet1()[["var2_e_soa"]]
+
+    var1_e_soa2 <- varSet1()[["var1_e_soa2"]]
+    var2_e_soa2 <- varSet1()[["var2_e_soa2"]]
+
+    xdata <- varSet1()[["xdata"]]
+    ydata <- varSet1()[["ydata"]]
+    xlim <- varSet1()[["xlim"]]
+    ylim <- varSet1()[["ylim"]]
+    levels1 <- varSet1()[["levels1"]]
+    xlabel <- varSet1()[["xlabel"]]
+    ylabel <- varSet1()[["ylabel"]]
+
+     
+   
+
+    # ===================================================================
+    
+
+   
+    # if (input$flag == "15") { #var1=ALK, var2=DIC
+    #   menu_var1 <- as.numeric(input$var1_flag15) * 1e-6 #convert umol/kg to mol/kg
+    #   menu_var2 <- as.numeric(input$var2_flag15) * 1e-6 #convert umol/kg to mol/kg
+
+    #   # Scale factor for sig, sigm
+    #   scalefactor1 = 1e+6 #ALK
+    #   scalefactor2 = 1e+6 #DIC
+
+    #   # uncertainties in input variables var1 and var2
+    #   # NB: length of these arrays defines the resolution of the grid
+    #   var1_e <- seq(0., maxlim, 1/redn) * 1e-6
+    #   var2_e <- var1_e
+
+    #   # state-of-art errors for vars (c.f. Orr et al. 2017, Table 1)
+    #   # (to be plotted as crosses in error-space diagram)
+    #   var1_e_soa   <- 2 #umol/kg
+    #   var2_e_soa   <- 2 #umol/kg
+
+    #   var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
+    #   var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+
+
+    #   # data arrays for plot
+    #   xdata <- var2_e*1e+6  ;  ydata <- var1_e*1e+6
+    #   xlim <- c(0,maxlim)  ; ylim <- xlim
+    #   # levels1 <- c(1,seq(2,20,by=2))
+    #   levels1 <- eval(parse(text = input$level_flag15))
+    #   xlabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
+    #   ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
+
+    # } else if (input$flag == "8") { #var1=pH, var2=ALK
+    #   menu_var1 <- as.numeric(input$var1_flag8)
+    #   menu_var2 <- as.numeric(input$var2_flag8) * 1e-6 #convert umol/kg to mol/kg
+
+    #   # Scale factor for sig, sigm
+    #   scalefactor1 = 1 #pH
+    #   scalefactor2 = 1e+6 #ALK
+      
+    #   # Uncertainties in input variables
+    #   # NB: length of these arrays defines the resolution of the grid
+    #   var1_e <- seq(0,0.03,0.0015/redn)
+    #   var2_e <- seq(0., maxlim, 1/redn) * 1e-6
+      
+    #   var1_e_soa   <- c(0.003, 0.01) #pH
+    #   var2_e_soa   <- 2 #umol/kg
+      
+    #   var1_e_soa2  <- var1_e_soa
+    #   var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+      
+    #   # for plot
+    #   xdata <- var1_e           ;  ydata <- var2_e * 1e+6
+    #   xlim <- c(0,0.03) ; ylim <- c(0,maxlim) 
+    #   # levels1 <- c(4.2, seq(4,7,by=1))
+    #   levels1 <- eval(parse(text = input$level_flag8))
+    #   xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
+    #   ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
+    
+    # } else if (input$flag == "9") { #var1=pH, var2=DIC
+    #   menu_var1 <- as.numeric(input$var1_flag9)
+    #   menu_var2 <- as.numeric(input$var2_flag9) * 1e-6 #convert umol/kg to mol/kg
+
+    #   # Scale factor for sig, sigm
+    #   scalefactor1 = 1 #pH
+    #   scalefactor2 = 1e+6 #DIC
+      
+    #   # Uncertainties in input variables
+    #   # NB: length of these arrays defines the resolution of the grid
+    #   var1_e <- seq(0,0.03,0.0015/redn)
+    #   var2_e <- seq(0., maxlim, 1/redn) * 1e-6
+      
+    #   var1_e_soa   <- c(0.003, 0.01) #pH
+    #   var2_e_soa   <- 2 #umol/kg
+      
+    #   var1_e_soa2  <- var1_e_soa
+    #   var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+      
+    #   # for plot
+    #   xdata <- var1_e           ;  ydata <- var2_e * 1e+6
+    #   xlim <- c(0,0.03) ; ylim <- c(0,maxlim) 
+    #   # levels1 <- c(4.5, seq(1,20,by=1))
+    #   levels1 <- eval(parse(text = input$level_flag9))
+    #   xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
+    #   ylabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
+    
+    # } else if (input$flag == "21") { #var1=pCO2, var2=pH
+    #   menu_var1 <- as.numeric(input$var1_flag21)
+    #   menu_var2 <- as.numeric(input$var2_flag21)
+      
+    #   # Scale factor for sig, sigm
+    #   scalefactor1 = 1 #pCO2
+    #   scalefactor2 = 1 #pH
+
+    #   # Uncertainties in input variables
+    #   # NB: length of these arrays defines the resolution of the grid
+    #   var1_e <- seq(0,maxlim,1/redn)
+    #   var2_e <- seq(0,0.03,0.0015/redn)
+      
+    #   var1_e_soa   <- 2
+    #   var2_e_soa   <- c(0.003, 0.01)
+      
+    #   var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
+    #   var2_e_soa2  <- var2_e_soa
+      
+    #   # for plot
+    #   xdata <- var2_e           ;  ydata <- var1_e
+    #   xlim <- c(0,0.03)  ; ylim <- c(0,maxlim)
+    #   # levels1 <- c(7,seq(0,20,by=2))
+    #   levels1 <- eval(parse(text = input$level_flag21))
+    #   xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
+    #   ylabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
+
+    # } else if (input$flag == "24") { #var1=pCO2, var2=ALK
+    #   menu_var1 <- as.numeric(input$var1_flag24)
+    #   menu_var2 <- as.numeric(input$var2_flag24) * 1e-6 #convert umol/kg to mol/kg
+
+    #   # Scale factor for sig, sigm
+    #   scalefactor1 = 1 #pCO2
+    #   scalefactor2 = 1e+6 #ALK
+      
+    #   # Uncertainties in input variables
+    #   # NB: length of these arrays defines the resolution of the grid
+    #   var1_e <- seq(0,maxlim,1/redn)
+    #   var2_e <- seq(0., maxlim, 1/redn) * 1e-6
+      
+    #   var1_e_soa   <- 2
+    #   var2_e_soa   <- 2
+      
+    #   var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
+    #   var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+      
+    #   # for plot
+    #   xdata <- var1_e ; ydata <- var2_e*1e+6
+    #   xlim <- c(0,maxlim)  ; ylim <- xlim
+    #   # levels1 <- seq(3,7,by=0.5)
+    #   levels1 <- eval(parse(text = input$level_flag24))
+    #   xlabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
+    #   ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
+    
+    # } else if (input$flag == "25") { #var1=pCO2, var2=DIC
+    #   menu_var1 <- as.numeric(input$var1_flag25)
+    #   menu_var2 <- as.numeric(input$var2_flag25)* 1e-6 #convert umol/kg to mol/kg
+
+    #   # Scale factor for sig, sigm
+    #   scalefactor1 = 1 #pCO2
+    #   scalefactor2 = 1e+6 #DIC
+      
+    #   # Uncertainties in input variables
+    #   # NB: length of these arrays defines the resolution of the grid
+    #   var1_e <- seq(0,maxlim,1/redn)
+    #   var2_e <- seq(0., maxlim, 1/redn) * 1e-6
+      
+    #   var1_e_soa   <- 2
+    #   var2_e_soa   <- 2
+      
+    #   var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
+    #   var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+      
+    #   # for plot
+    #   xdata <- var1_e ; ydata <- var2_e*1e+6
+    #   xlim <- c(0,maxlim)  ; ylim <- xlim
+    #   # levels1 <- c(4.7,seq(1,20,by=1))
+    #   levels1 <- eval(parse(text = input$level_flag25))
+    #   xlabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
+    #   ylabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
+    # }
 
     # ===================================================================
     # Compute derived carbonate system vars with  seacarb routine carb
     # (Southern Ocean)
     print("Running carb function:")
+    print(menu_flag)
+    print(menu_var1)
+    print(menu_var2)
     vars <- carb  (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, 
                    T=menu_temp, Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil, 
                    k1k2='w14', kf='dg', ks="d", pHscale="T", 
                    b="u74", gas="potential", warn='n')
+    print("var1_e:")
+    print(var1_e)
 
     pH <- vars$pH
     pCO2 <- vars$pCO2
@@ -895,6 +988,7 @@ server <- function(input, output) {
     vars <- vars[rep(row.names(vars), numerrs), ]
 
     # print(as.numeric(vars))
+    print("dim(vars):")
     print( dim(vars) )  #[1] 21  9 CORRECT
     
     # ===================================================================
