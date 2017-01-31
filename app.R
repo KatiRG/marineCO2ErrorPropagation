@@ -836,140 +836,26 @@ server <- function(input, output) {
 
   }) #./varCarb
 
-  # ---------------------------------------------------------------------
-  # Calculate and render plot based on user selections
-  output$erspace <- renderPlot({
-    # maxlim = varScales()[["maxlim"]]
-    # redn = varScales()[["redn"]]
+  # Compute other parts of error-space diagrams
+  varErr <- reactive({
+
     maxlim = 20 #varScales()[["maxlim"]]
     redn = 0.5 #varScales()[["redn"]]
+    scalefactor1 = varSet1()[["scalefactor1"]]
+    scalefactor2 = varSet1()[["scalefactor2"]]
 
-    # Outputs from varSet1 (user inputs)
     menu_flag <- varSet1()[["menu_flag"]]
+    menu_var1 <- varSet1()[["menu_var1"]]
+    menu_var2 <- varSet1()[["menu_var2"]]
+    menu_outvar <- varSet1()[["menu_outvar"]]
+
     menu_salt <- varSet1()[["menu_salt"]]
     menu_temp <- varSet1()[["menu_temp"]]
     menu_pressure <- varSet1()[["menu_pressure"]]
     menu_phos <- varSet1()[["menu_phos"]]
     menu_sil <- varSet1()[["menu_sil"]]
-
-    menu_outvar <- varSet1()[["menu_outvar"]]
-    menu_var1 <- varSet1()[["menu_var1"]]
-    menu_var2 <- varSet1()[["menu_var2"]]
-    scalefactor1 = varSet1()[["scalefactor1"]]
-    scalefactor2 = varSet1()[["scalefactor2"]]
-
     var1_e <- varSet1()[["var1_e"]]
     var2_e <- varSet1()[["var2_e"]]
-
-    var1_e_soa <- varSet1()[["var1_e_soa"]]
-    var2_e_soa <- varSet1()[["var2_e_soa"]]
-
-    var1_e_soa2 <- varSet1()[["var1_e_soa2"]]
-    var2_e_soa2 <- varSet1()[["var2_e_soa2"]]
-
-    xdata <- varSet1()[["xdata"]]
-    ydata <- varSet1()[["ydata"]]
-    xlim <- varSet1()[["xlim"]]
-    ylim <- varSet1()[["ylim"]]
-    levels1 <- varSet1()[["levels1"]]
-    xlabel <- varSet1()[["xlabel"]]
-    ylabel <- varSet1()[["ylabel"]]
-
-    # Outputs from carb fn
-    er_outvar <- varCarb()[["er_outvar"]]
-   
-
-    # ===================================================================
-   
-
-    # ===================================================================
-    # Compute derived carbonate system vars with  seacarb routine carb
-    # (Southern Ocean)
-    
-
-    # vars <- carb  (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, 
-    #                T=menu_temp, Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil, 
-    #                k1k2='w14', kf='dg', ks="d", pHscale="T", 
-    #                b="u74", gas="potential", warn='n')
-    # print("var1_e:")
-    # print(var1_e)
-
-    # pH <- vars$pH
-    # pCO2 <- vars$pCO2
-
-    # # Compute H+ from pH, i.e., pH = -log10[H+], where [H+] is the hydrogen ion concentration in mol/kg
-    # H = 10^(-1*vars$pH)
-
-    # # Keep only key columns to be consistent with output from 'errors.R' routine (called below)
-    # vars <- data.frame(H, vars[,c('pH','CO2','fCO2','pCO2','HCO3','CO3','OmegaAragonite','OmegaCalcite')] )
-
-    # # Duplicate rows in *vars* until same as number of members of error vector var1_e
-    # numerrs <- length(var1_e)
-    # vars <- vars[rep(row.names(vars), numerrs), ]
-
-    # # print(as.numeric(vars))
-    # print("dim(vars):")
-    # print( dim(vars) )  #[1] 21  9 CORRECT
-    
-    # # ===================================================================
-    # # Use 1-D error vectors to build 2-D error array (to plot contours in DIC-ALK space)
-    # if (menu_flag == 15) dat <- expand.grid(var2_e, var1_e)
-    # else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 21 || menu_flag == 24 || menu_flag == 25) {        
-    #     dat <- expand.grid(var1_e,  var2_e)
-    # }
-
-    # # ===================================================================
-    # # Compute derived vars and their errors
-    # print("Running carb function again:")
-
-    # vars <- carb (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp, 
-    #               Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil, 
-    #               k1k2='w14', kf='dg', ks="d", pHscale="T", 
-    #               b="u74", gas="potential", warn='n')
-
-    # print( dim(vars) )  #[1]  1 19 CORRECT
-
-    # H = 10^(-1*vars$pH)         # H+ concentration (mol/kg)
-    # vars <- data.frame(H, vars) # Add H+ as new column to vars data frame
-
-    # print("Calculating absEt:")
-
-    # # Absolute errors: propagated uncertainties
-    # if (menu_flag == 15) {
-    #   dat_evar1 <- dat$Var2           ;  dat_evar2 <- dat$Var1
-    # } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 21 || menu_flag == 24 || menu_flag == 25) {
-    #   dat_evar1 <- dat$Var1           ;  dat_evar2 <- dat$Var2
-    #   print("defining order for absET!!")
-    # }
-    # absEt <- errors (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp,
-    #                 Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil, 
-    #                 evar1=dat_evar1, evar2=dat_evar2, 
-    #                 eS=0, eT=0, ePt=0, eSit=0, epK=epKstd,
-    #                 k1k2='w14', kf='dg', ks="d", pHscale="T",
-    #                 b="u74", gas="potential", warn='no')
-
-    # # Keep only key columns in vars for consistency with columns in absEt
-    # vars <- vars[,colnames(absEt)]
-
-    # # Duplicate rows in *vars* until same as number of members of error vector var1_e
-    # numerrs <- length(dat$Var1)
-    # vars <- vars[rep(row.names(vars), numerrs), ]
-
-    # print( dim(vars) ) #[1] 441   9 CORRECT
-
-    # #Relative errors (in percent)
-    # relEt <- 100* absEt / vars      #Total relative error (from constants and other input vars)
-
-    
-
-    # ===================================================================
-    # Define simpler names for changes in variables
-
-    # er_outvar = relEt[[menu_outvar]]
-
-
-    # ===================================================================
-    # Compute other parts of error-space diagrams
 
     # Constants-pair CURVE (propagated error from constants = that from input pair)
     # (Southern Ocean)
@@ -998,6 +884,58 @@ server <- function(input, output) {
         
     sigm1   <- data.frame(errm[1]) * scalefactor1
     sigm2   <- data.frame(errm[2]) * scalefactor2
+
+    list("sig1" = sig1,
+         "sig2" = sig2,
+         "sigm1" = sigm1,
+         "sigm2" = sigm2
+        )
+
+  }) #./varErr
+
+  # ---------------------------------------------------------------------
+  # Render plot
+  output$erspace <- renderPlot({
+    # maxlim = varScales()[["maxlim"]]
+    # redn = varScales()[["redn"]]
+    maxlim = 20 #varScales()[["maxlim"]]
+    redn = 0.5 #varScales()[["redn"]]
+
+    # Outputs from varSet1 (user inputs)
+    menu_flag <- varSet1()[["menu_flag"]]
+    
+
+    menu_outvar <- varSet1()[["menu_outvar"]]
+
+    menu_var1 <- varSet1()[["menu_var1"]]
+    menu_var2 <- varSet1()[["menu_var2"]]
+   
+
+    var1_e <- varSet1()[["var1_e"]]
+    var2_e <- varSet1()[["var2_e"]]
+
+    var1_e_soa <- varSet1()[["var1_e_soa"]]
+    var2_e_soa <- varSet1()[["var2_e_soa"]]
+
+    var1_e_soa2 <- varSet1()[["var1_e_soa2"]]
+    var2_e_soa2 <- varSet1()[["var2_e_soa2"]]
+
+    xdata <- varSet1()[["xdata"]]
+    ydata <- varSet1()[["ydata"]]
+    xlim <- varSet1()[["xlim"]]
+    ylim <- varSet1()[["ylim"]]
+    levels1 <- varSet1()[["levels1"]]
+    xlabel <- varSet1()[["xlabel"]]
+    ylabel <- varSet1()[["ylabel"]]
+
+    # Output from carb fn
+    er_outvar <- varCarb()[["er_outvar"]]
+   
+    # Output from errhalf and errmid fns
+    sig1 <- varErr()[["sig1"]]
+    sig2 <- varErr()[["sig2"]]
+    sigm1 <- varErr()[["sigm1"]]
+    sigm2 <- varErr()[["sigm2"]]
     
 
     # ===================================================================
