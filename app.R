@@ -465,7 +465,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
         ), #./fluidRow
 
         fluidRow(
-          column(3, 
+          column(4, 
             textInput(inputId = "pressure",
               label = "Pressure (dbars)",
               value = 0 #pass as dbar
