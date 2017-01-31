@@ -1011,7 +1011,7 @@ server <- function(input, output) {
     filename =  function() {
       paste("errorSpace", "pdf", sep=".")
     },
-    
+
 
     # content is a function with argument file. content writes the plot to the device
     content = function(file) {
@@ -1021,13 +1021,25 @@ server <- function(input, output) {
       #   pdf(file) # open the pdf device
       pdf(file) # open the pdf device
       
+      myx <- c(0.0000000000, 0.0001959028, 0.0009783208, 0.0019491959, 0.0029052365, 
+               0.0038391664, 0.0047438781, 0.0056124859, 0.0064383793, 0.0072152728, 
+               0.0079372536, 0.0085988272, 0.0091949586, 0.0097211107, 0.0101732793, 
+               0.0105480231, 0.0108424901, 0.0110544392, 0.0111822573, 0.0112232621,
+               0.0112249718)
+
+      myy <- c(0.0000000000, 0.0001959028, 0.0009783208, 0.0019491959, 0.0029052365, 
+               0.0038391664, 0.0047438781, 0.0056124859, 0.0064383793, 0.0072152728, 
+               0.0079372536, 0.0085988272, 0.0091949586, 0.0097211107, 0.0101732793, 
+               0.0105480231, 0.0108424901, 0.0110544392, 0.0111822573, 0.0112232621,
+               0.0112249718)
       # plot(x=x(), y=y(), main = "error-space plot", xlab = xlabel, ylab = ylabel) # draw the plot
-      plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,
-                     NULL, NULL,
-                     zenon(sigm2[[menu_outvar]]), zenon(sigm1[[menu_outvar]]),
-                     var2_e_soa2, var1_e_soa2,
-                     xdata, ydata, za, levels1,
-                     'flattest')
+      plot(x=myx, y=myy, main = "error-space plot", xlab = 'xlabel', ylab = 'ylabel')
+      # plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,
+      #                NULL, NULL,
+      #                zenon(sigm2[[menu_outvar]]), zenon(sigm1[[menu_outvar]]),
+      #                var2_e_soa2, var1_e_soa2,
+      #                xdata, ydata, za, levels1,
+      #                'flattest')
 
 
       dev.off()  # turn the device off

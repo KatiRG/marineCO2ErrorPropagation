@@ -88,3 +88,8 @@ https://www.youtube.com/watch?v=LSnWGmVkB6A
 -> https://github.com/aagarw30/R-Shinyapp-Tutorial/tree/master/how%20to%20download%20plot
 --> https://github.com/aagarw30/R-Shinyapp-Tutorial/blob/master/how%20to%20download%20plot/ui.R,
     https://github.com/aagarw30/R-Shinyapp-Tutorial/blob/master/how%20to%20download%20plot/server.R
+
+sample data
+-----------
+ myx <- c(0.0000000000, 0.0001959028, 0.0009783208, 0.0019491959, 0.0029052365, 0.0038391664, 0.0047438781, 0.0056124859, 0.0064383793, 0.0072152728, 0.0079372536, 0.0085988272, 0.0091949586, 0.0097211107, 0.0101732793, 0.0105480231, 0.0108424901, 0.0110544392, 0.0111822573, 0.0112232621,
+0.0112249718)
