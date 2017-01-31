@@ -374,7 +374,9 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
         fluidRow(
           column( 5, plotOutput("erspace", width = "500px", height = "500px") )
         ),
-        downloadButton(outputId = "down", label = "Save plot")
+        downloadButton(outputId = "down", label = "Save plot"),
+        actionButton(inputId = "save",
+          label = "Click me")
       ) #./mainPanel
 
       
@@ -573,8 +575,6 @@ server <- function(input, output) {
   source("/homel/cnangini/PROJECTS/seacarb-git/R/errors.R")
   source("/homel/cnangini/PROJECTS/seacarb-git/R/derivnum.R")
 
-
-
   # Default uncertainties in equilibrium constants 
   # (pK0, pK1, pK2, pKb, pKw, pKa, pKc, Bt)
   # ------------------------------------------------
@@ -639,10 +639,37 @@ server <- function(input, output) {
     done <- c('error contour plot')
   
   }
+  #----------------------------------------------------------------------
+  #Reactive elements
+   varSet1 <- reactive({
+    my_flag <- as.numeric(input$flag)
+
+    myc_outvar <- reactive({switch(
+      input$flag,
+      "1" = as.character(input$outvar_flag1),
+      "8" = as.character(input$outvar_flag8),  #full list
+      "9" = as.character(input$outvar_flag9),  #full list
+      "15" = as.character(input$outvar_flag15),  #full list
+      "21" = as.character(input$outvar_flag21),  #exclude pCO2
+      "24" = as.character(input$outvar_flag24),  #exclude pCO2
+      "25" = as.character(input$outvar_flag25)  #exclude pCO2
+    )})
+    my_outvar <- myc_outvar()
+
+    if (input$flag == "15") { #var1=ALK, var2=DIC
+      my_var1 <- as.numeric(input$var1_flag15) * 1e-6 #convert umol/kg to mol/kg
+    }
+
+    unlist(list("my_outvar" = my_outvar,        
+                "my_var1" = my_var1))
+  }) #./varSet1
 
   # ---------------------------------------------------------------------
   # Calculate and render plot based on user selections
   output$erspace <- renderPlot({
+    print("varSet():")
+    print(varSet1())
+    print(varSet1()[["my_outvar"]])
 
     maxlim = 20
     redn = 0.5 #reduce resolution by 50%
@@ -973,6 +1000,8 @@ server <- function(input, output) {
     
     za <- er_outvar
 
+    # pdf(file="halfway_CO3.pdf",  width=10.0, height=7.0)
+
     if (menu_flag == 15) {
       sigcritXa <- sig2[[menu_outvar]]  ;  sigcritYa <- sig1[[menu_outvar]]  #xdata; ydata
 
@@ -1003,49 +1032,95 @@ server <- function(input, output) {
                      'flattest')
     }
 
+    # observeEvent(input$save, {
+    #   print(as.numeric(input$save))
+    #   fname = function(file) {
+    #     pdf(file) # open the pdf device
+    #     print("file:")
+    #     print(file)
+    #   } 
+
+    #   pdf(file="halfway_CO3.pdf",  width=10.0, height=7.0)
+    #   print("in observeEvent")
+
+    #   if (menu_flag == 15) {
+    #     sigcritXa <- sig2[[menu_outvar]]  ;  sigcritYa <- sig1[[menu_outvar]]  #xdata; ydata
+
+    #     plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,
+    #                    NULL, NULL,
+    #                    zenon(sigm2[[menu_outvar]]), zenon(sigm1[[menu_outvar]]),
+    #                    var2_e_soa2, var1_e_soa2,
+    #                    xdata, ydata, za, levels1,
+    #                    'flattest')
+    #   } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 24 || menu_flag == 25) {
+    #     sigcritXa <- sig1[[menu_outvar]]  ;  sigcritYa <- sig2[[menu_outvar]]  #xdata; ydata
+
+    #     plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,
+    #                    NULL, NULL,
+    #                    zenon(sigm1[[menu_outvar]]), zenon(sigm2[[menu_outvar]]),
+    #                    var1_e_soa2, var2_e_soa2,
+    #                    xdata, ydata, za, levels1,
+    #                    'flattest')
+    #   } else if (menu_flag == 21) {
+    #     za <- t(za)      
+    #     sigcritXa <- sig2[[menu_outvar]]  ;  sigcritYa <- sig1[[menu_outvar]]  #xdata; ydata
+
+    #     plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,
+    #                    NULL, NULL,
+    #                    zenon(sigm2[[menu_outvar]]), zenon(sigm1[[menu_outvar]]),
+    #                    var2_e_soa2, var1_e_soa2,
+    #                    xdata, ydata, za, levels1,
+    #                    'flattest')
+    #   }
+    #   dev.off()
+    # })
+    # # dev.off()
+
+
 
   }) #./renderPlot
 
-  # downloadHandler contains 2 arguments as functions, namely filename, content
-  output$down <- downloadHandler(
-    filename =  function() {
-      paste("errorSpace", "pdf", sep=".")
-    },
-
-
-    # content is a function with argument file. content writes the plot to the device
-    content = function(file) {
-      # if(input$var3 == "png")
-      #   png(file) # open the png device
-      # else
-      #   pdf(file) # open the pdf device
-      pdf(file) # open the pdf device
-      
-      myx <- c(0.0000000000, 0.0001959028, 0.0009783208, 0.0019491959, 0.0029052365, 
+ xhat <- reactive({
+      c(0.0000000000, 0.0001959028, 0.0009783208, 0.0019491959, 0.0029052365, 
                0.0038391664, 0.0047438781, 0.0056124859, 0.0064383793, 0.0072152728, 
                0.0079372536, 0.0085988272, 0.0091949586, 0.0097211107, 0.0101732793, 
                0.0105480231, 0.0108424901, 0.0110544392, 0.0111822573, 0.0112232621,
                0.0112249718)
+  })
 
-      myy <- c(0.0000000000, 0.0001959028, 0.0009783208, 0.0019491959, 0.0029052365, 
+  yhat <- reactive({
+      c(0.0000000000, 0.0001959028, 0.0009783208, 0.0019491959, 0.0029052365, 
                0.0038391664, 0.0047438781, 0.0056124859, 0.0064383793, 0.0072152728, 
                0.0079372536, 0.0085988272, 0.0091949586, 0.0097211107, 0.0101732793, 
                0.0105480231, 0.0108424901, 0.0110544392, 0.0111822573, 0.0112232621,
                0.0112249718)
-      # plot(x=x(), y=y(), main = "error-space plot", xlab = xlabel, ylab = ylabel) # draw the plot
-      plot(x=myx, y=myy, main = "error-space plot", xlab = 'xlabel', ylab = 'ylabel')
-      # plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,
-      #                NULL, NULL,
-      #                zenon(sigm2[[menu_outvar]]), zenon(sigm1[[menu_outvar]]),
-      #                var2_e_soa2, var1_e_soa2,
-      #                xdata, ydata, za, levels1,
-      #                'flattest')
+  })
 
 
-      dev.off()  # turn the device off
+ # downloadHandler contains 2 arguments as functions, namely filename, content
+  # output$down <- downloadHandler(
+  #   filename =  function() {
+  #     paste("errorSpace", "pdf", sep=".")
+  #   },
+
+
+  #   # content is a function with argument file. content writes the plot to the device
+  #   content = function(file) {
+  #     pdf(file) # open the pdf device
+  #     print("file:")
+  #     print(file)
+        
+  #     # plot(x=x(), y=y(), main = "error-space plot", xlab = xlabel, ylab = ylabel) # draw the plot
+  #     # plot(x=myx, y=myy, main = "error-space plot", xlab = 'xlabel', ylab = 'ylabel')
+  #     plot(x=xhat(), y=yhat(), main = "error-space plot", xlab = 'xlabel', ylab = 'ylabel')
+
+  #     dev.off()  # turn the device off
     
-    } 
-  ) #./downloadHandler
+  #   } 
+  # ) #./downloadHandler
+
+
+
 
 
 } #./server
