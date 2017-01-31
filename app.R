@@ -20,7 +20,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
         tags$p("Choose the output variable to be calculated based on the input 
                 values and (modifiable) values for salinity, temperature, pressure, 
                 phosphate and silicon."),
-        tags$p("The default plot level is also modifiable.")
+        tags$p("The default contour level is also modifiable.")
 
       )
     ), #./fluidRow for intro text
@@ -80,11 +80,11 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
                     selectize = TRUE, width = NULL, size = NULL
           ),
 
-          # Plot level
+          # Contour level
           fluidRow(
             column(6,
               textInput(inputId = "level_flag15",
-                label = "Plot level",
+                label = "Contour level",
                 value = "c(1,seq(2,20,by=1))"
               )
             )
@@ -494,9 +494,70 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
           </footer>'
     )
 
-  )  #./tabPanel_2 
+  ),  #./tabPanel_2 
 
+  tabPanel("Contact",
 
+    fluidRow(
+      column(5,
+        tags$html(
+          tags$strong("Principal Investigator"),
+          tags$br(),
+          tags$body(
+                  a("James Orr", href="mailto:james.orr@lsce.ipsl.fr")
+          ),
+          tags$br(),
+          tags$body("Research Director (Ocean carbon-cycle modeling), LSCE/CEA, Gif-sur-Yvette, France"),
+          tags$br(),
+          tags$br()
+        )
+
+      ) #./column
+    ), #./fluidRow
+
+    fluidRow(
+      column(5,
+        tags$html(
+          tags$strong("Application Developer"),
+          tags$br(),
+          tags$body(a("Cathy Nangini", href="mailto:cnangini@lsce.ipsl.fr")),
+          tags$br(),
+          tags$body("GitHub ", a("@katiRG", href="www.github.com/katiRG", target="blank")),
+          tags$br(),
+          tags$body("Data scientist at LSCE/DRF/CEA, Gif-sur-Yvette, France")
+        
+        )
+
+      ) #./column
+    ), #./fluidRow
+    
+
+    HTML('<footer style="
+            position:absolute; bottom:0; width:100%; height:50px; color: white;
+            padding: 10px; background-color: #f5f5f5; z-index: 1000;
+          ">
+            <p class="text-muted credit" style="margin:5px 0;">Created by
+            <a target="_blank" href="http://www.lsce.ipsl.fr/en">
+            <span title="Climate and Environment Sciences Laboratory" style="font-weight:bold;">
+            LSCE</span></a>
+            &nbsp;<a target="_blank" href="http://www.lsce.ipsl.fr/en">
+            <img src="LSCE_Icon.png" 
+            title="Climate and Environment Sciences Laboratory"/></a> 
+            
+            and hosted by <a target="_blank" href="http://www.ipsl.fr/en">
+            <span title="Institut Pierre Simon Laplace" style="font-weight:bold;">
+            IPSL</span></a>&nbsp;<a target="_blank" href="http://www.ipsl.fr/en">
+            <img src="IPSL_logo.png" title="Institut Pierre Simon Laplace"/></a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 0.1 - 2017/01/31
+            </p>
+
+            <p class="text-muted credit">
+
+        
+          </footer>'
+    )
+
+  )  #./tabPanel_3
 ) #./navbarPage    ### ./fluidPage
 
 server <- function(input, output) {
