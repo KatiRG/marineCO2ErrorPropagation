@@ -904,12 +904,7 @@ server <- function(input, output) {
     # Outputs from varSet1 (user inputs)
     menu_flag <- varSet1()[["menu_flag"]]
     
-
     menu_outvar <- varSet1()[["menu_outvar"]]
-
-    menu_var1 <- varSet1()[["menu_var1"]]
-    menu_var2 <- varSet1()[["menu_var2"]]
-   
 
     var1_e <- varSet1()[["var1_e"]]
     var2_e <- varSet1()[["var2_e"]]
@@ -981,44 +976,98 @@ server <- function(input, output) {
 
   }) #./renderPlot
 
- xhat <- reactive({
-      c(0.0000000000, 0.0001959028, 0.0009783208, 0.0019491959, 0.0029052365, 
-               0.0038391664, 0.0047438781, 0.0056124859, 0.0064383793, 0.0072152728, 
-               0.0079372536, 0.0085988272, 0.0091949586, 0.0097211107, 0.0101732793, 
-               0.0105480231, 0.0108424901, 0.0110544392, 0.0111822573, 0.0112232621,
-               0.0112249718)
-  })
-
-  yhat <- reactive({
-      c(0.0000000000, 0.0001959028, 0.0009783208, 0.0019491959, 0.0029052365, 
-               0.0038391664, 0.0047438781, 0.0056124859, 0.0064383793, 0.0072152728, 
-               0.0079372536, 0.0085988272, 0.0091949586, 0.0097211107, 0.0101732793, 
-               0.0105480231, 0.0108424901, 0.0110544392, 0.0111822573, 0.0112232621,
-               0.0112249718)
-  })
-
 
  # downloadHandler contains 2 arguments as functions, namely filename, content
-  # output$down <- downloadHandler(
-  #   filename =  function() {
-  #     paste("errorSpace", "pdf", sep=".")
-  #   },
+  output$down <- downloadHandler(
+    filename =  function() {
+      paste("errorSpace", "pdf", sep=".")
+    },
 
 
-  #   # content is a function with argument file. content writes the plot to the device
-  #   content = function(file) {
-  #     pdf(file) # open the pdf device
-  #     print("file:")
-  #     print(file)
+    # content is a function with argument file. content writes the plot to the device
+    content = function(file) {
+      pdf(file) # open the pdf device
+      print("file:")
+      print(file)
         
-  #     # plot(x=x(), y=y(), main = "error-space plot", xlab = xlabel, ylab = ylabel) # draw the plot
-  #     # plot(x=myx, y=myy, main = "error-space plot", xlab = 'xlabel', ylab = 'ylabel')
-  #     plot(x=xhat(), y=yhat(), main = "error-space plot", xlab = 'xlabel', ylab = 'ylabel')
+      # Vars needed to make plot (must be reactive otherwise can't read them)
+      maxlim = 20 #varScales()[["maxlim"]]
+      redn = 0.5 #varScales()[["redn"]]
 
-  #     dev.off()  # turn the device off
+      # Outputs from varSet1 (user inputs)
+      menu_flag <- varSet1()[["menu_flag"]]
+      
+      menu_outvar <- varSet1()[["menu_outvar"]]
+
+      var1_e <- varSet1()[["var1_e"]]
+      var2_e <- varSet1()[["var2_e"]]
+
+      var1_e_soa <- varSet1()[["var1_e_soa"]]
+      var2_e_soa <- varSet1()[["var2_e_soa"]]
+
+      var1_e_soa2 <- varSet1()[["var1_e_soa2"]]
+      var2_e_soa2 <- varSet1()[["var2_e_soa2"]]
+
+      xdata <- varSet1()[["xdata"]]
+      ydata <- varSet1()[["ydata"]]
+      xlim <- varSet1()[["xlim"]]
+      ylim <- varSet1()[["ylim"]]
+      levels1 <- varSet1()[["levels1"]]
+      xlabel <- varSet1()[["xlabel"]]
+      ylabel <- varSet1()[["ylabel"]]
+
+      # Output from carb fn
+      er_outvar <- varCarb()[["er_outvar"]]
+     
+      # Output from errhalf and errmid fns
+      sig1 <- varErr()[["sig1"]]
+      sig2 <- varErr()[["sig2"]]
+      sigm1 <- varErr()[["sigm1"]]
+      sigm2 <- varErr()[["sigm2"]]
+      
+
+      # ===================================================================
+      # Error-space diagram of relative error in CO3 for At-Ct input pair
+      dim(er_outvar) <- c(length(var2_e), length(var1_e))
+      
+      subtitle <-paste("Output variable", menu_outvar, sep=" ")      
+      
+      za <- er_outvar    
+
+      if (menu_flag == 15) {
+        sigcritXa <- sig2[[menu_outvar]]  ;  sigcritYa <- sig1[[menu_outvar]]  #xdata; ydata
+
+        plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,
+                       NULL, NULL,
+                       zenon(sigm2[[menu_outvar]]), zenon(sigm1[[menu_outvar]]),
+                       var2_e_soa2, var1_e_soa2,
+                       xdata, ydata, za, levels1,
+                       'flattest')
+      } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 24 || menu_flag == 25) {
+        sigcritXa <- sig1[[menu_outvar]]  ;  sigcritYa <- sig2[[menu_outvar]]  #xdata; ydata
+
+        plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,
+                       NULL, NULL,
+                       zenon(sigm1[[menu_outvar]]), zenon(sigm2[[menu_outvar]]),
+                       var1_e_soa2, var2_e_soa2,
+                       xdata, ydata, za, levels1,
+                       'flattest')
+      } else if (menu_flag == 21) {
+        za <- t(za)      
+        sigcritXa <- sig2[[menu_outvar]]  ;  sigcritYa <- sig1[[menu_outvar]]  #xdata; ydata
+
+        plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,
+                       NULL, NULL,
+                       zenon(sigm2[[menu_outvar]]), zenon(sigm1[[menu_outvar]]),
+                       var2_e_soa2, var1_e_soa2,
+                       xdata, ydata, za, levels1,
+                       'flattest')
+      }
+
+      dev.off()  # turn the device off
     
-  #   } 
-  # ) #./downloadHandler
+    } #./content
+  ) #./downloadHandler
 
 
 
