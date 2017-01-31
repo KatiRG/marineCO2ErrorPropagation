@@ -719,9 +719,14 @@ server <- function(input, output) {
       var1_e_soa   <- 2 #umol/kg
       var2_e_soa   <- 2 #umol/kg
 
-      var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
-      var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
-
+      # Edit soa2 value if modified by user
+      if(input$refPt) { #Edit ref pt checkbox has been selected
+        var1_e_soa2  <- as.numeric(input$refPt1_flag15)
+        var2_e_soa2  <- as.numeric(input$refPt2_flag15)
+      } else {
+        var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
+        var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
+      }
 
       # data arrays for plot
       xdata <- var2_e*1e+6  ;  ydata <- var1_e*1e+6
