@@ -13,14 +13,17 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
   tabPanel("Error-space diagram",
 
     tags$h3("Interactive error-space diagram"),
+    tags$em("Inputs"),
 
     fluidRow(
-      column(5, 
+      column(4, 
         tags$p("Choose an input pair and change their default values if desired."),
         tags$p("Choose the output variable to be calculated based on the input 
                 values and (modifiable) values for salinity, temperature, pressure, 
                 phosphate and silicon."),
-        tags$p("The default contour level is also modifiable.")
+        tags$em("Display"),
+        tags$p("The default contour level and the reference point (state-of-the-art measurement values
+                marked as crossed on the plot) are also modifiable.")
 
       )
     ), #./fluidRow for intro text
