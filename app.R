@@ -352,17 +352,17 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
             column(3, checkboxInput("axes_flag21", "Axes limits ") ),
             column(4, conditionalPanel(
               condition = "input.axes_flag21 == true",
-              textInput(inputId = "xaxis_flag21",
-                label =  HTML("Max &sigma;<sub>pH</sub>"),
-                value = 0.030)
+              textInput(inputId = "err1_flag21",                
+                label =  HTML("Max &sigma;<sub>pCO<sub>2</sub></sub> (umol kg<sup>-1</sup>)"),
+                value = 20)
               ) #./inner conditionalPanel
             ), #./column
 
             column(4,conditionalPanel(
               condition = "input.axes_flag21 == true",
-              textInput(inputId = "yaxis_flag21",
-                label = HTML("Max &sigma;<sub>pCO<sub>2</sub></sub> (umol kg<sup>-1</sup>)"),
-                value = 20)
+              textInput(inputId = "err2_flag21",
+                label = HTML("Max &sigma;<sub>pH</sub>"),
+                value = 0.03)
               ) #./inner conditionalPanel
             ) #./column
           ), #./fluidRow axes
@@ -1054,10 +1054,19 @@ server <- function(input, output) {
       scalefactor1 = 1 #pCO2
       scalefactor2 = 1 #pH
 
-      # Uncertainties in input variables
-      # NB: length of these arrays defines the resolution of the grid
-      var1_e <- seq(0,maxlim,1/redn)
-      var2_e <- seq(0,0.03,0.0015/redn)
+      # Max error limits
+      if(input$axes_flag21) { #Axes limits checkbox has been selected
+        max_error1 <- as.numeric(input$err1_flag21)
+        max_error2 <- as.numeric(input$err2_flag21)
+      } else {
+        max_error1 <- 20
+        max_error2 <- 0.030
+      }
+
+      # Uncertainties in input variables var1 and var2
+      # NB: both vectors must have same number of points 
+      var1_e <- seq(0, max_error1, (max_error1/numpts) * (1/redn) )
+      var2_e <- seq(0., max_error2, (max_error2/numpts)*(1.0/redn) )
       
       var1_e_soa   <- 2
       var2_e_soa   <- c(0.003, 0.01)
@@ -1073,7 +1082,7 @@ server <- function(input, output) {
       
       # for plot
       xdata <- var2_e           ;  ydata <- var1_e
-      xlim <- c(0,0.03)  ; ylim <- c(0,maxlim)
+      xlim <- c(0,max_error2)  ; ylim <- c(0,max_error1)
       # levels1 <- c(7,seq(0,20,by=2))
       levels1 <- eval(parse(text = input$level_flag21))
       xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
