@@ -268,7 +268,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
             column(3, checkboxInput("axes_flag9", "Axes limits ") ),
             column(4, conditionalPanel(
               condition = "input.axes_flag9 == true",
-              textInput(inputId = "axes_flag9",
+              textInput(inputId = "err1_flag9",
                 label =  HTML("Max &sigma;<sub>pH</sub>"),
                 value = 0.030)
               ) #./inner conditionalPanel
@@ -276,7 +276,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
 
             column(4,conditionalPanel(
               condition = "input.axes_flag9 == true",
-              textInput(inputId = "axes_flag9",
+              textInput(inputId = "err2_flag9",
                 label = HTML("Max &sigma;<sub>C<sub>T</sub></sub> (umol kg<sup>-1</sup>)"),
                 value = 20)
               ) #./inner conditionalPanel
@@ -981,9 +981,6 @@ server <- function(input, output) {
 
       # Uncertainties in input variables var1 and var2
       # NB: both vectors must have same number of points
-      
-      # Uncertainties in input variables
-      # NB: length of these arrays defines the resolution of the grid
       var1_e <- seq(0, max_error1, (max_error1/numpts) * (1/redn) )
       var2_e <- seq(0., max_error2, (max_error2/numpts)*(1.0/redn) ) * 1e-6
       
@@ -1014,11 +1011,20 @@ server <- function(input, output) {
       # Scale factor for sig, sigm
       scalefactor1 = 1 #pH
       scalefactor2 = 1e+6 #DIC
-      
-      # Uncertainties in input variables
-      # NB: length of these arrays defines the resolution of the grid
-      var1_e <- seq(0,0.03,0.0015/redn)
-      var2_e <- seq(0., maxlim, 1/redn) * 1e-6
+
+      # Max error limits
+      if(input$axes_flag9) { #Axes limits checkbox has been selected
+        max_error1 <- as.numeric(input$err1_flag9)
+        max_error2 <- as.numeric(input$err2_flag9)
+      } else {
+        max_error1 <- 0.030
+        max_error2 <- 20
+      }
+
+      # Uncertainties in input variables var1 and var2
+      # NB: both vectors must have same number of points 
+      var1_e <- seq(0, max_error1, (max_error1/numpts) * (1/redn) )
+      var2_e <- seq(0., max_error2, (max_error2/numpts)*(1.0/redn) ) * 1e-6
       
       var1_e_soa   <- c(0.003, 0.01) #pH
       var2_e_soa   <- 2 #umol/kg
@@ -1034,7 +1040,7 @@ server <- function(input, output) {
       
       # for plot
       xdata <- var1_e           ;  ydata <- var2_e * 1e+6
-      xlim <- c(0,0.03) ; ylim <- c(0,maxlim) 
+      xlim <- c(0,max_error1) ; ylim <- c(0,max_error2)
       # levels1 <- c(4.5, seq(1,20,by=1))
       levels1 <- eval(parse(text = input$level_flag9))
       xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
