@@ -120,9 +120,8 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
           condition = "input.flag == '8'", #full output var list
 
           # Output variable list
-          selectInput(inputId="outvar_flag8", label="Output variable", 
-                    c("H+" = "H",
-                      "pCO2" = "pCO2",
+          selectInput(inputId="outvar_flag8", label="Output variable",
+                    c("pCO2" = "pCO2",
                       "CO3^2-" = "CO3",
                       "CO2*" = "CO2",
                       "HCO3-" = "HCO3",
@@ -186,9 +185,8 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
           condition = "input.flag == '9'", #full output var list
 
           # Output variable list
-          selectInput(inputId="outvar_flag9", label="Output variable", 
-                    c("H+" = "H",
-                      "pCO2" = "pCO2",
+          selectInput(inputId="outvar_flag9", label="Output variable",
+                    c("pCO2" = "pCO2",
                       "CO3^2-" = "CO3",
                       "CO2*" = "CO2",
                       "HCO3-" = "HCO3",
@@ -252,9 +250,8 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
           condition = "input.flag == '21'", #exclude pCO2
 
           # Output variable list
-          selectInput(inputId="outvar_flag21", label="Output variable", 
-                    c("H+" = "H",
-                      "CO3^2-" = "CO3",
+          selectInput(inputId="outvar_flag21", label="Output variable",
+                    c("CO3^2-" = "CO3",
                       "CO2*" = "CO2",
                       "HCO3-" = "HCO3",
                       "OmegaCalcite" = "OmegaCalcite",
@@ -317,7 +314,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
           condition = "input.flag == '24'", #exclude pCO2
 
           # Output variable list
-          selectInput(inputId="outvar_flag24", label="Output variable", 
+          selectInput(inputId="outvar_flag24", label="Output variable",
                     c("H+" = "H",
                       "CO3^2-" = "CO3",
                       "CO2*" = "CO2",
@@ -382,7 +379,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
           condition = "input.flag == '25'", #exclude pCO2
 
           # Output variable list
-          selectInput(inputId="outvar_flag25", label="Output variable", 
+          selectInput(inputId="outvar_flag25", label="Output variable",
                     c("H+" = "H",
                       "CO3^2-" = "CO3",
                       "CO2*" = "CO2",
@@ -501,9 +498,6 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
         ),
         downloadButton(outputId = "down", label = "Save plot")       
       ) #./mainPanel
-
-      
-      
 
     ), #./sidebarLayout
 
@@ -701,8 +695,8 @@ server <- function(input, output) {
   # Default uncertainties in equilibrium constants 
   # (pK0, pK1, pK2, pKb, pKw, pKa, pKc, Bt)
   # ------------------------------------------------
-  # epKstd  <- c(0.004, 0.015,  0.03, 0.01,  0.01, 0.02, 0.02, 0.01)
-  epKstd  <- c(0.002, 0.01,  0.02, 0.01,  0.01, 0.01, 0.01, 0.00)
+  epKstd  <- c(0.004, 0.015,  0.03, 0.01,  0.01, 0.02, 0.02, 0.01)
+  # epKstd  <- c(0.002, 0.01,  0.02, 0.01,  0.01, 0.01, 0.01, 0.00) #agrees with draft ms c. dec 2016
 
 
   # ===================================================================
