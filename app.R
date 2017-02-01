@@ -98,7 +98,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
             column(3, checkboxInput("axes_flag15", "Axes limits ") ),
             column(4, conditionalPanel(
               condition = "input.axes_flag15 == true",
-              textInput(inputId = "axes_flag15",
+              textInput(inputId = "err1_flag15", #NB: ALK is y-axis!!!!
                 label =  HTML("Max &sigma;<sub>A<sub>T</sub></sub> (umol kg<sup>-1</sup>)"),
                 value = 20)
               ) #./inner conditionalPanel
@@ -106,7 +106,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
 
             column(4,conditionalPanel(
               condition = "input.axes_flag15 == true",
-              textInput(inputId = "axes_flag15",
+              textInput(inputId = "err2_flag15", #NB: DIC is x-axis!!!!
                 label = HTML("Max &sigma;<sub>C<sub>T</sub></sub> (umol kg<sup>-1</sup>)"),
                 value = 20)
               ) #./inner conditionalPanel
@@ -818,6 +818,7 @@ server <- function(input, output) {
   epKstd  <- c(0.004, 0.015,  0.03, 0.01,  0.01, 0.02, 0.02, 0.01)
   # epKstd  <- c(0.002, 0.01,  0.02, 0.01,  0.01, 0.01, 0.01, 0.00) #agrees with draft ms c. dec 2016
 
+  numpts = 20 #number of pts in plotted x, y vectors
 
   # ===================================================================
   # Functions
@@ -925,10 +926,20 @@ server <- function(input, output) {
       scalefactor1 = 1e+6 #ALK
       scalefactor2 = 1e+6 #DIC
 
-      # uncertainties in input variables var1 and var2
+      # Construct error vectors from input ranges
+      # NB: both vectors must have same number of points
+      if(input$axes_flag15) { #Axes limits checkbox has been selected        
+        max_error1 <- as.numeric(input$err1_flag15)
+        max_error2 <- as.numeric(input$err2_flag15)        
+      } else {
+        max_error1 <- 20
+        max_error2 <- 20
+      }
+
+      # Uncertainties in input variables var1 and var2
       # NB: length of these arrays defines the resolution of the grid
-      var1_e <- seq(0., maxlim, 1/redn) * 1e-6
-      var2_e <- var1_e
+      var1_e <- seq(0., max_error1, (max_error1/numpts)*(1.0/redn) ) * 1e-6
+      var2_e <- seq(0., max_error2, (max_error2/numpts)*(1.0/redn) ) * 1e-6
 
       # state-of-art errors for vars (c.f. Orr et al. 2017, Table 1)
       # (to be plotted as crosses in error-space diagram)
@@ -937,11 +948,8 @@ server <- function(input, output) {
 
       # Edit soa2 value if modified by user
       if(input$refPt_flag15) { #Edit ref pt checkbox has been selected
-        # var1_e_soa2  <- eval(parse(text = input$refPt1_flag15))
-        # var2_e_soa2  <- eval(parse(text = input$refPt2_flag15))
         var1_e_soa2  <- as.numeric(input$refPt1_flag15)
-        var2_e_soa2  <- as.numeric(input$refPt2_flag15)
-        print(var2_e_soa2)
+        var2_e_soa2  <- as.numeric(input$refPt2_flag15)        
       } else {
         var1_e_soa2  <- c(var1_e_soa, var1_e_soa)
         var2_e_soa2  <- c(var2_e_soa, var2_e_soa)
@@ -949,7 +957,7 @@ server <- function(input, output) {
 
       # data arrays for plot
       xdata <- var2_e*1e+6  ;  ydata <- var1_e*1e+6
-      xlim <- c(0,maxlim)  ; ylim <- xlim
+      xlim <- c(0,max_error2)  ; ylim <-c(0,max_error1)
       # levels1 <- c(1,seq(2,20,by=2))
       levels1 <- eval(parse(text = input$level_flag15))
       xlabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
