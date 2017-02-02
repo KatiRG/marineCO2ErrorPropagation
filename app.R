@@ -807,10 +807,10 @@ server <- function(input, output) {
 
   # ===================================================================
   # Define function sources
-  source("/homel/cnangini/PROJECTS/seacarb-git/R/errhalf.R")
-  source("/homel/cnangini/PROJECTS/seacarb-git/R/errmid.R")
-  source("/homel/cnangini/PROJECTS/seacarb-git/R/errors.R")
-  source("/homel/cnangini/PROJECTS/seacarb-git/R/derivnum.R")
+  source("errhalf.R")
+  source("errmid.R")
+  source("errors.R")
+  source("derivnum.R")
 
   # Default uncertainties in equilibrium constants 
   # (pK0, pK1, pK2, pKb, pKw, pKa, pKc, Bt)

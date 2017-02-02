@@ -4,6 +4,8 @@ This is an interactive application that displays the error-space diagram for a s
 
 The calculations are performed using the functions in the R-based ![seacarb](https://github.com/jamesorr/seacarb-git.git) repository.
 
+Click ![here](https://katirg.shinyapps.io/marineco2errorpropagation/) to open the application.
+
 
 ![alt tag](https://cloud.githubusercontent.com/assets/1254764/22546203/66d52e78-e93c-11e6-94fd-5d33529ad093.png)
 
