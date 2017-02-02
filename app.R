@@ -12,7 +12,15 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
 
   tabPanel("Error-space diagram",
 
-    tags$h3("Interactive error-space diagram"),
+    # tags$h3("Interactive error-space diagram"),
+
+    fluidRow(
+      column(4, 
+        tags$p("Displays the relative percent error (100% * absolute error/computed variable value) 
+                of the computed variable. ")
+        )
+    ),
+
     tags$em("Inputs"),
 
     fluidRow(
@@ -1399,7 +1407,7 @@ server <- function(input, output) {
     # Error-space diagram of relative error in CO3 for At-Ct input pair
     dim(er_outvar) <- c(length(var2_e), length(var1_e))
     
-    subtitle <-paste("Output variable", menu_outvar, sep=" ")      
+    subtitle <-paste("Relative percent error for", menu_outvar, sep=" ")      
     
     za <- er_outvar
 
