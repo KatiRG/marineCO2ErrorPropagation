@@ -173,7 +173,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
             column(6,
               textInput(inputId = "level_flag8",
                 label = "Plot level",
-                value = "c(4.2, seq(4,7,by=1))"
+                value = "seq(4,10,by=.5)"
               )
             )
           ), #./fluidRow
@@ -193,7 +193,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
               condition = "input.axes_flag8 == true",
               textInput(inputId = "err2_flag8",
                 label = HTML("Max &sigma;<sub>A<sub>T</sub></sub> (umol kg<sup>-1</sup>)"),
-                value = 20)
+                value = 80)
               ) #./inner conditionalPanel
             ) #./column
           ), #./fluidRow axes
@@ -1414,7 +1414,18 @@ server <- function(input, output) {
                      var2_e_soa2, var1_e_soa2,
                      xdata, ydata, za, levels1,
                      'flattest')
-    } else if (menu_flag == 8 || menu_flag == 9 || menu_flag == 24 || menu_flag == 25) {
+    
+    } else if (menu_flag == 8) {
+      sigcritXa <- sig1[[menu_outvar]]  ;  sigcritYa <- sig2[[menu_outvar]]  #xdata; ydata
+
+      plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,
+                     NULL, NULL,
+                     zenon(sigm1[[menu_outvar]]), zenon(sigm2[[menu_outvar]]),
+                     var1_e_soa2, var2_e_soa2,
+                     xdata, ydata, za, levels1,
+                     'edge')
+    
+    } else if (menu_flag == 9 || menu_flag == 24 || menu_flag == 25) {
       sigcritXa <- sig1[[menu_outvar]]  ;  sigcritYa <- sig2[[menu_outvar]]  #xdata; ydata
 
       plterrcontour (sigcritXa, sigcritYa, xlabel, ylabel, subtitle, xlim, ylim,
@@ -1423,6 +1434,7 @@ server <- function(input, output) {
                      var1_e_soa2, var2_e_soa2,
                      xdata, ydata, za, levels1,
                      'flattest')
+    
     } else if (menu_flag == 21) {
       za <- t(za)      
       sigcritXa <- sig2[[menu_outvar]]  ;  sigcritYa <- sig1[[menu_outvar]]  #xdata; ydata
