@@ -28,7 +28,7 @@
 #
 errhalf <- 
 function(flag, var1, var2, S=35, T=25, Patm=1, P=0, Pt=0, Sit=0, 
-         epK=c(0.004, 0.015, 0.03, 0.01, 0.01, 0.02, 0.02, 0.01), 
+         epK=c(0.002, 0.0075, 0.015, 0.01, 0.01, 0.02, 0.02, 0.02), 
          k1k2='x', kf='x', ks="d", pHscale="T", b="u74", gas="potential", warn="y")
 {
 
@@ -92,7 +92,7 @@ function(flag, var1, var2, S=35, T=25, Patm=1, P=0, Pt=0, Sit=0,
     # Default value for epK
     if (missing(epK))
     {
-        epK <- c(0.004, 0.015, 0.03, 0.01, 0.01, 0.02, 0.02, 0.01)
+        epK <- c(0.002, 0.0075, 0.015, 0.01, 0.01, 0.02, 0.02, 0.02)
     }
     else
     {

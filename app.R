@@ -16,7 +16,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
 
     fluidRow(
       column(4, 
-        tags$p("Displays the relative percent error (100% * absolute error/computed variable value) 
+        tags$p("Displays the relative percent error (100 * absolute error/computed variable value) 
                 of the computed variable. ")
         )
     ),
@@ -40,7 +40,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
 
     # tags$p('errors(flag, var1, var2, S=35, T=25, Patm=1, P=0, Pt=0, Sit=0, 
     #             evar1=0, evar2=0, eS=0.01, eT=0.01, ePt=0, eSit=0, 
-    #             epK=c(0.002, 0.01, 0.02, 0.01, 0.01, 0.02, 0.02)'),
+    #             epK=c(0.002, 0.0075, 0.015, 0.01, 0.01, 0.02, 0.02, 0.02)'),
 
     sidebarLayout(
       sidebarPanel(
@@ -823,8 +823,7 @@ server <- function(input, output) {
   # Default uncertainties in equilibrium constants 
   # (pK0, pK1, pK2, pKb, pKw, pKa, pKc, Bt)
   # ------------------------------------------------
-  epKstd  <- c(0.004, 0.015,  0.03, 0.01,  0.01, 0.02, 0.02, 0.01)
-  # epKstd  <- c(0.002, 0.01,  0.02, 0.01,  0.01, 0.01, 0.01, 0.00) #agrees with draft ms c. dec 2016
+  epKstd  <- c(0.002, 0.0075,  0.015, 0.01,  0.01, 0.02, 0.02, 0.02)
 
   numpts = 20 #number of pts in plotted x, y vectors
 
@@ -1009,7 +1008,7 @@ server <- function(input, output) {
       xlim <- c(0,max_error1) ; ylim <- c(0,max_error2) 
       # levels1 <- c(4.2, seq(4,7,by=1))
       levels1 <- eval(parse(text = input$level_flag8))
-      xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
+      xlabel <- expression(paste(sigma[pH]," ",sep=""))
       ylabel <- expression(paste(sigma[italic("A")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
 
     } else if (input$flag == "9") { #var1=pH, var2=DIC
@@ -1051,7 +1050,7 @@ server <- function(input, output) {
       xlim <- c(0,max_error1) ; ylim <- c(0,max_error2)
       # levels1 <- c(4.5, seq(1,20,by=1))
       levels1 <- eval(parse(text = input$level_flag9))
-      xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
+      xlabel <- expression(paste(sigma[pH]," ",sep=""))
       ylabel <- expression(paste(sigma[italic("C")[T]]," (",mu,"mol kg"^{-1},")",sep=""))
     
     } else if (input$flag == "21") { #var1=pCO2, var2=pH
@@ -1093,7 +1092,7 @@ server <- function(input, output) {
       xlim <- c(0,max_error2)  ; ylim <- c(0,max_error1)
       # levels1 <- c(7,seq(0,20,by=2))
       levels1 <- eval(parse(text = input$level_flag21))
-      xlabel <- expression(paste(sigma[pH]," (total scale)",sep=""))
+      xlabel <- expression(paste(sigma[pH]," ",sep=""))
       ylabel <- expression(paste(sigma[pCO[2]]," (",mu,"atm",")",sep=""))
 
     } else if (input$flag == "24") { #var1=pCO2, var2=ALK
