@@ -641,12 +641,8 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
             &nbsp;<a target="_blank" href="http://www.lsce.ipsl.fr/en">
             <img src="LSCE_Icon.png" 
             title="Climate and Environment Sciences Laboratory"/></a> 
-            
-            and hosted by <a target="_blank" href="http://www.ipsl.fr/en">
-            <span title="Institut Pierre Simon Laplace" style="font-weight:bold;">
-            IPSL</span></a>&nbsp;<a target="_blank" href="http://www.ipsl.fr/en">
-            <img src="IPSL_logo.png" title="Institut Pierre Simon Laplace"/></a>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 0.1 - 2017/01/31
+                       
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 0.1 - 2018/07/31
             </p>
 
             <p class="text-muted credit">

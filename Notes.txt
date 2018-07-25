@@ -31,6 +31,9 @@ pull James Orr's functions from github:
 git clone https://github.com/jamesorr/seacarb-git.git
 branch: buffesm1
 
+install seacarb in R:
+> install.packages('seacarb')
+
 Conditional Panel
 -----------------
 https://shiny.rstudio.com/articles/dynamic-ui.html
