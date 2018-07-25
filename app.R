@@ -670,7 +670,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
         tags$br(),
         tags$body("Based on the work published by ",
                   a("Orr et al.,", href="https://github.com/jamesorr/seacarb-git", 
-                    target="blank"), " (submitted, 2017)."
+                    target="blank"), " (submitted, 2018)."
           )
         )
 
