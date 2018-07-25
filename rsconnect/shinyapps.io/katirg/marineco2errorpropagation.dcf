@@ -2,7 +2,8 @@ name: marineco2errorpropagation
 title:
 account: katirg
 server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
 appId: 154515
-bundleId: 698393
+bundleId: 1499110
 url: https://katirg.shinyapps.io/marineco2errorpropagation/
-when: 1486037983.7495
+when: 1532522200.36434
