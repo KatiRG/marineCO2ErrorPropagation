@@ -28,7 +28,7 @@
 #
 errhalf <- 
 function(flag, var1, var2, S=35, T=25, Patm=1, P=0, Pt=0, Sit=0, 
-         epK=c(0.002, 0.0075, 0.015, 0.01, 0.01, 0.02, 0.02, 0.02), 
+         epK=c(0.002, 0.0075, 0.015, 0.01, 0.01, 0.02, 0.02), eBt=0.02,
          k1k2='x', kf='x', ks="d", pHscale="T", b="u74", gas="potential", warn="y")
 {
 
@@ -86,13 +86,16 @@ function(flag, var1, var2, S=35, T=25, Patm=1, P=0, Pt=0, Sit=0,
     var1name <- varnames[flag,1]
     var2name <- varnames[flag,2]
 
+    # if eBt=NULL, set eBt equal to zero
+    if(is.null(eBt)) {eBt = 0.0}
+
     # if epK=NULL, set all pK errors to zero
-    if(is.null(epK)) {epK = c(0, 0, 0, 0, 0, 0, 0, 0)}
+    if(is.null(epK)) {epK = rep(0,7)}
 
     # Default value for epK
     if (missing(epK))
     {
-        epK <- c(0.002, 0.0075, 0.015, 0.01, 0.01, 0.02, 0.02, 0.02)
+        epK <- c(0.002, 0.0075, 0.015, 0.01, 0.01, 0.02, 0.02)
     }
     else
     {
@@ -100,9 +103,9 @@ function(flag, var1, var2, S=35, T=25, Patm=1, P=0, Pt=0, Sit=0,
         if (length(epK) == 1 && epK == 0)
         {
             # this means that the caller does not want to account for errors on dissoc. constants
-            epK <- rep(0, 8)
+            epK <- rep(0, 7)
         }
-        else if (length(epK) != 8)
+        else if (length(epK) != 7)
             stop ("invalid parameter epK: ", epK)
         else
         {
@@ -132,7 +135,7 @@ function(flag, var1, var2, S=35, T=25, Patm=1, P=0, Pt=0, Sit=0,
 #  2. Compute errors from all constants (Kall):
 #  --------------------------------------------
    eKall <- errors  (flag=flag, var1=var1, var2=var2, S=S, T=T, Patm=Patm, P=P, Pt=Pt, Sit=Sit,  
-                         evar1=0, evar2=0, eS=0, eT=0, ePt=0, eSit=0, epK=epK,
+                         evar1=0, evar2=0, eS=0, eT=0, ePt=0, eSit=0, epK=epK, eBt=eBt,
                          k1k2=k1k2, kf=kf, ks=ks, pHscale=pHscale, b=b, gas=gas, warn=warn)
 #  eKall[isH]$H <- var1*0.0
 
