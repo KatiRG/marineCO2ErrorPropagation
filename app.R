@@ -599,12 +599,80 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
               value = 60 #60.e-6 mol/kg
             )
           )
-        ) #./fluidRow
+        ), #./fluidRow
 
         # sliderInput(inputId = "evar1",
         #   label = "Max error in first var (must be > 0):",
         #   value = 0, min = 0, max = 20
         # )
+
+        #TEST
+        #changeDefault_flag
+          fluidRow(
+            column(8, checkboxInput("changeDefault_flag", "Change default uncertainties for constants") )
+          ),
+          fluidRow(
+            column(3, conditionalPanel(
+              condition = "input.changeDefault_flag == true",
+              textInput(inputId = "err_epk0",
+                label = "epK0",
+                value = 2)
+              ) #./inner conditionalPanel
+            ), #./column
+            column(3,conditionalPanel(
+              condition = "input.changeDefault_flag == true",
+              textInput(inputId = "err_epK1",
+                label = HTML("epK1"),
+                value = 2)
+              ) #./inner conditionalPanel
+            ), #./column
+            column(3, conditionalPanel(
+              condition = "input.changeDefault_flag == true",
+              textInput(inputId = "err_epk2",
+                label = "epK2",
+                value = 2)
+              ) #./inner conditionalPanel
+            ), #./column
+            column(3, conditionalPanel(
+              condition = "input.changeDefault_flag == true",
+              textInput(inputId = "err_epkb",
+                label = "epKb",
+                value = 2)
+              ) #./inner conditionalPanel
+            ) #./column
+          ),
+
+          fluidRow(
+            column(3, conditionalPanel(
+              condition = "input.changeDefault_flag == true",
+              textInput(inputId = "err_epkw",
+                label = "epKw",
+                value = 2)
+              ) #./inner conditionalPanel
+            ), #./column
+            column(3,conditionalPanel(
+              condition = "input.changeDefault_flag == true",
+              textInput(inputId = "err_epKspa",
+                label = HTML("epKspa"),
+                value = 2)
+              ) #./inner conditionalPanel
+            ), #./column
+            column(3, conditionalPanel(
+              condition = "input.changeDefault_flag == true",
+              textInput(inputId = "err_epkspc",
+                label = "epKspc",
+                value = 2)
+              ) #./inner conditionalPanel
+            ), #./column
+            column(3, conditionalPanel(
+              condition = "input.changeDefault_flag == true",
+              textInput(inputId = "err_eBt",
+                label = "eBt",
+                value = 2)
+              ) #./inner conditionalPanel
+            ) #./column
+          )
+          
 
 
       ), #./sidebarPanel
