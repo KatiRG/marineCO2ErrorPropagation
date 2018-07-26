@@ -20,7 +20,8 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
         tags$p("Choose an input pair and change their default values if desired."),
         tags$p("Choose the output variable to be calculated based on the input 
                 values and (modifiable) values for salinity, temperature, pressure, 
-                phosphate and silicon.")
+                phosphate and silicon."),
+        tags$p("To restore defaults, refresh the browser.")
 
       )
     ), #./fluidRow for intro text
@@ -609,12 +610,12 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
         #TEST
         #changeDefault_flag
           fluidRow(
-            column(8, checkboxInput("changeDefault_flag", "Change default uncertainties for constants") )
+            column(10, checkboxInput("changeDefault_flag", "Change default uncertainties for constants (not recommended)") )
           ),
           fluidRow(
             column(3, conditionalPanel(
               condition = "input.changeDefault_flag == true",
-              textInput(inputId = "err_epk0",
+              textInput(inputId = "err_epK0",
                 label = "epK0",
                 value = 0.002)
               ) #./inner conditionalPanel
@@ -628,14 +629,14 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
             ), #./column
             column(3, conditionalPanel(
               condition = "input.changeDefault_flag == true",
-              textInput(inputId = "err_epk2",
+              textInput(inputId = "err_epK2",
                 label = "epK2",
                 value = 0.015)
               ) #./inner conditionalPanel
             ), #./column
             column(3, conditionalPanel(
               condition = "input.changeDefault_flag == true",
-              textInput(inputId = "err_epkb",
+              textInput(inputId = "err_epKb",
                 label = "epKb",
                 value = 0.01)
               ) #./inner conditionalPanel
@@ -645,7 +646,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
           fluidRow(
             column(3, conditionalPanel(
               condition = "input.changeDefault_flag == true",
-              textInput(inputId = "err_epkw",
+              textInput(inputId = "err_epKw",
                 label = "epKw",
                 value = 0.01)
               ) #./inner conditionalPanel
@@ -659,7 +660,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
             ), #./column
             column(3, conditionalPanel(
               condition = "input.changeDefault_flag == true",
-              textInput(inputId = "err_epkspc",
+              textInput(inputId = "err_epKspc",
                 label = "epKspc",
                 value = 0.02)
               ) #./inner conditionalPanel
@@ -889,7 +890,7 @@ server <- function(input, output) {
   # (pK0, pK1, pK2, pKb, pKw, pKa, pKc, Bt)
   # Read these from the sidebar text boxes.
   # ------------------------------------------------
-  epKstd  <- c(0.002, 0.0075,  0.015, 0.01,  0.01, 0.02, 0.02, 0.02)
+  epKstd_orig  <- c(0.002, 0.0075,  0.015, 0.01,  0.01, 0.02, 0.02, 0.02)
 
   numpts = 20 #number of pts in plotted x, y vectors
 
@@ -974,6 +975,24 @@ server <- function(input, output) {
     menu_pressure <- as.numeric(input$pressure) /10  #convert dbars to bars
     menu_phos <- as.numeric(input$phos) * 1e-6 #convert umol/kg to mol/kg
     menu_sil <- as.numeric(input$sil) * 1e-6 #convert umol/kg to mol/kg
+
+    menu_err_epK0 <- as.numeric(input$err_epK0)
+    menu_err_epK1 <- as.numeric(input$err_epK1)
+    menu_err_epK2 <- as.numeric(input$err_epK2)
+    menu_err_epKb <- as.numeric(input$err_epKb)
+    menu_err_epKw <- as.numeric(input$err_epKw)
+    menu_err_epKspa <- as.numeric(input$err_epKspa)
+    menu_err_epKspc <- as.numeric(input$err_epKspc)
+    menu_err_eBt <- as.numeric(input$err_eBt)
+
+
+
+    # does not work if menu_err_epKspc is used
+    epKstd <- c(menu_err_epK0, menu_err_epK1, menu_err_epK2, menu_err_epKb, menu_err_epKw, menu_err_epKspa, menu_err_epKspc, menu_err_eBt)
+    
+    #works
+    # epKstd <- c(menu_err_epK0, menu_err_epK1, menu_err_epK2, menu_err_epKb, menu_err_epKw, menu_err_epKspa, 0.02, menu_err_eBt)
+    # c(0.002, 0.0075, 0.015, 0.01, 0.01, 0.02, 0.02, 0.02)
 
     # Define output variable based on conditional menu selection
     conditional_outvar <- reactive({switch(
@@ -1269,7 +1288,8 @@ server <- function(input, output) {
           "ylim" = ylim,
           "levels1" = levels1,
           "xlabel" = xlabel,
-          "ylabel" = ylabel
+          "ylabel" = ylabel,
+          "epKstd" = epKstd
         )
   }) #./varSet1
 
@@ -1289,6 +1309,7 @@ server <- function(input, output) {
     menu_sil <- varSet1()[["menu_sil"]]
     var1_e <- varSet1()[["var1_e"]]
     var2_e <- varSet1()[["var2_e"]]
+    epKstd <- varSet1()[["epKstd"]]
 
 
     print("Running carb function:")
@@ -1392,6 +1413,7 @@ server <- function(input, output) {
     menu_sil <- varSet1()[["menu_sil"]]
     var1_e <- varSet1()[["var1_e"]]
     var2_e <- varSet1()[["var2_e"]]
+    epKstd <- varSet1()[["epKstd"]]
 
     # Constants-pair CURVE (propagated error from constants = that from input pair)
     # (Southern Ocean)
