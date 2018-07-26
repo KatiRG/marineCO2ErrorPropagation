@@ -616,28 +616,28 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
               condition = "input.changeDefault_flag == true",
               textInput(inputId = "err_epk0",
                 label = "epK0",
-                value = 2)
+                value = 0.002)
               ) #./inner conditionalPanel
             ), #./column
             column(3,conditionalPanel(
               condition = "input.changeDefault_flag == true",
               textInput(inputId = "err_epK1",
                 label = HTML("epK1"),
-                value = 2)
+                value = 0.0075)
               ) #./inner conditionalPanel
             ), #./column
             column(3, conditionalPanel(
               condition = "input.changeDefault_flag == true",
               textInput(inputId = "err_epk2",
                 label = "epK2",
-                value = 2)
+                value = 0.015)
               ) #./inner conditionalPanel
             ), #./column
             column(3, conditionalPanel(
               condition = "input.changeDefault_flag == true",
               textInput(inputId = "err_epkb",
                 label = "epKb",
-                value = 2)
+                value = 0.01)
               ) #./inner conditionalPanel
             ) #./column
           ),
@@ -647,28 +647,28 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
               condition = "input.changeDefault_flag == true",
               textInput(inputId = "err_epkw",
                 label = "epKw",
-                value = 2)
+                value = 0.01)
               ) #./inner conditionalPanel
             ), #./column
             column(3,conditionalPanel(
               condition = "input.changeDefault_flag == true",
               textInput(inputId = "err_epKspa",
                 label = HTML("epKspa"),
-                value = 2)
+                value = 0.02)
               ) #./inner conditionalPanel
             ), #./column
             column(3, conditionalPanel(
               condition = "input.changeDefault_flag == true",
               textInput(inputId = "err_epkspc",
                 label = "epKspc",
-                value = 2)
+                value = 0.02)
               ) #./inner conditionalPanel
             ), #./column
             column(3, conditionalPanel(
               condition = "input.changeDefault_flag == true",
               textInput(inputId = "err_eBt",
                 label = "eBt",
-                value = 2)
+                value = 0.02)
               ) #./inner conditionalPanel
             ) #./column
           )
@@ -887,6 +887,7 @@ server <- function(input, output) {
 
   # Default uncertainties in equilibrium constants 
   # (pK0, pK1, pK2, pKb, pKw, pKa, pKc, Bt)
+  # Read these from the sidebar text boxes.
   # ------------------------------------------------
   epKstd  <- c(0.002, 0.0075,  0.015, 0.01,  0.01, 0.02, 0.02, 0.02)
 
