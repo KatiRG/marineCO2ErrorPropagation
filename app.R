@@ -672,14 +672,12 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
               ) #./inner conditionalPanel
             ) #./column
           )
-          
-
 
       ), #./sidebarPanel
 
       mainPanel(
         fluidRow(
-          column( 5,            
+          column( 5,
             tags$p("Plot of the percent relative error (100 * absolute error/computed variable value) 
                 of the computed variable.")
           )
@@ -701,11 +699,17 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
       ) #./mainPanel
 
     ), #./sidebarLayout
-
-
+  
+    #Gap after bottom of sidebar and above footer
+    fluidRow(
+          column( 6,           
+            tags$br(), tags$br(), tags$br(), tags$br(), tags$br()
+            )
+        ), 
+    
     HTML('<footer style="
-            position:absolute; bottom:0; width:100%; height:50px; color: white;
-            padding: 10px; background-color: #f5f5f5; z-index: 1000;
+            position:fixed; bottom:0; width:100%; height:50px; color: white;
+            padding: 10px; background-color: #f5f5f5; z-index: 1000;box-sizing:border-box;
           ">
             <p class="text-muted credit" style="margin:5px 0;">Created by
             <a target="_blank" href="http://www.lsce.ipsl.fr/en">
@@ -787,8 +791,8 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
     ), #./fluidRow for FAQ2
 
     HTML('<footer style="
-            position:absolute; bottom:0; width:100%; height:50px; color: white;
-            padding: 10px; background-color: #f5f5f5; z-index: 1000;
+            position:fixed; bottom:0; width:100%; height:50px; color: white;
+            padding: 10px; background-color: #f5f5f5; z-index: 1000;box-sizing:border-box;
           ">
             <p class="text-muted credit" style="margin:5px 0;">Created by
             <a target="_blank" href="http://www.lsce.ipsl.fr/en">
@@ -846,7 +850,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
     
 
     HTML('<footer style="
-            position:absolute; bottom:0; width:100%; height:50px; color: white;
+            position:fixed; bottom:0; width:100%; height:50px; color: white;
             padding: 10px; background-color: #f5f5f5; z-index: 1000;
           ">
             <p class="text-muted credit" style="margin:5px 0;">Created by
