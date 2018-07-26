@@ -69,7 +69,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
               )
             ),
 
-            column(6,
+            column(7,
               textInput(inputId = "var2_flag15",
                 label = HTML("Dissolved inorganic C (umol kg<sup>-1</sup>)"),
                 value = 2155
@@ -132,7 +132,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
               ) #./inner conditionalPanel
             ), #./column
 
-            column(5,conditionalPanel(
+            column(7,conditionalPanel(
               condition = "input.refPt_flag15 == true",
               textInput(inputId = "refPt2_flag15",
                 label = HTML("Dissolved inorg C (umol kg<sup>-1</sup>)"),
@@ -253,7 +253,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
               )
             ),
 
-            column(6,
+            column(7,
               textInput(inputId = "var2_flag9",
                 label = HTML("Dissolved inorganic C (umol kg<sup>-1</sup>)"),
                 value = 2155
@@ -302,7 +302,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
               ) #./inner conditionalPanel
             ), #./column
 
-            column(5,conditionalPanel(
+            column(7,conditionalPanel(
               condition = "input.refPt_flag9 == true",
               textInput(inputId = "refPt2_flag9",
                 label = HTML("Dissolved inorg C (umol kg<sup>-1</sup>)"),
@@ -507,7 +507,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
               )
             ),
 
-            column(6,
+            column(7,
               textInput(inputId = "var2_flag25",
                 label = HTML("Dissolved inorganic C (umol kg<sup>-1</sup>)"),
                 value = 2155
@@ -556,7 +556,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
               ) #./inner conditionalPanel
             ), #./column
 
-            column(5,conditionalPanel(
+            column(7,conditionalPanel(
               condition = "input.refPt_flag25 == true",
               textInput(inputId = "refPt2_flag25",
                 label = HTML("Dissolved inorg C (umol kg<sup>-1</sup>)"),
