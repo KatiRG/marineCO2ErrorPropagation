@@ -60,7 +60,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
 
             column(7,
               textInput(inputId = "var2_flag15",
-                label = HTML("Dissolved inorganic C (umol kg<sup>-1</sup>)"),
+                label = HTML("Dissolved inorganic C (DIC) (umol kg<sup>-1</sup>)"),
                 value = 2155
               )
             )
@@ -113,7 +113,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
           # Reference point
           fluidRow(
             column(3, checkboxInput("refPt_flag15", "Edit ref. point ") ),
-            column(4, conditionalPanel(
+            column(5, conditionalPanel(
               condition = "input.refPt_flag15 == true",
               textInput(inputId = "refPt1_flag15",
                 label = HTML("Alkalinity (umol kg<sup>-1</sup>)"),
@@ -121,10 +121,10 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
               ) #./inner conditionalPanel
             ), #./column
 
-            column(7,conditionalPanel(
+            column(4,conditionalPanel(
               condition = "input.refPt_flag15 == true",
               textInput(inputId = "refPt2_flag15",
-                label = HTML("Dissolved inorg C (umol kg<sup>-1</sup>)"),
+                label = HTML("DIC (umol kg<sup>-1</sup>)"),
                 value = 2)
               ) #./inner conditionalPanel
             ) #./column
@@ -244,7 +244,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
 
             column(7,
               textInput(inputId = "var2_flag9",
-                label = HTML("Dissolved inorganic C (umol kg<sup>-1</sup>)"),
+                label = HTML("Dissolved inorganic C (DIC) (umol kg<sup>-1</sup>)"),
                 value = 2155
               )
             )
@@ -291,10 +291,10 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
               ) #./inner conditionalPanel
             ), #./column
 
-            column(7,conditionalPanel(
+            column(4,conditionalPanel(
               condition = "input.refPt_flag9 == true",
               textInput(inputId = "refPt2_flag9",
-                label = HTML("Dissolved inorg C (umol kg<sup>-1</sup>)"),
+                label = HTML("DIC (umol kg<sup>-1</sup>)"),
                 value = 2)
               ) #./inner conditionalPanel
             ) #./column
@@ -498,7 +498,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
 
             column(7,
               textInput(inputId = "var2_flag25",
-                label = HTML("Dissolved inorganic C (umol kg<sup>-1</sup>)"),
+                label = HTML("Dissolved inorganic C (DIC) (umol kg<sup>-1</sup>)"),
                 value = 2155
               )
             )
@@ -537,7 +537,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
           # Reference point
           fluidRow(
             column(3, checkboxInput("refPt_flag25", "Edit ref. point ") ),
-            column(4, conditionalPanel(
+            column(3, conditionalPanel(
               condition = "input.refPt_flag25 == true",
               textInput(inputId = "refPt1_flag25",
                 label = "pCO2 [uatm]",
@@ -545,10 +545,10 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
               ) #./inner conditionalPanel
             ), #./column
 
-            column(7,conditionalPanel(
+            column(4,conditionalPanel(
               condition = "input.refPt_flag25 == true",
               textInput(inputId = "refPt2_flag25",
-                label = HTML("Dissolved inorg C (umol kg<sup>-1</sup>)"),
+                label = HTML("DIC (umol kg<sup>-1</sup>)"),
                 value = 2)
               ) #./inner conditionalPanel
             ) #./column
