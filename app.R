@@ -13,14 +13,6 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
   tabPanel("Error-space diagram",
 
     # tags$h3("Interactive error-space diagram"),
-
-    fluidRow(
-      column(4, 
-        tags$p("Displays the percent relative error (100 * absolute error/computed variable value) 
-                of the computed variable. ")
-        )
-    ),
-
     tags$em("Inputs"),
 
     fluidRow(
@@ -28,10 +20,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
         tags$p("Choose an input pair and change their default values if desired."),
         tags$p("Choose the output variable to be calculated based on the input 
                 values and (modifiable) values for salinity, temperature, pressure, 
-                phosphate and silicon."),
-        tags$em("Display"),
-        tags$p("The default contour level, the reference point (state-of-the-art measurement values
-                marked as crosses on the plot), and the axes limits are also modifiable.")
+                phosphate and silicon.")
 
       )
     ), #./fluidRow for intro text
@@ -622,9 +611,25 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
 
       mainPanel(
         fluidRow(
+          column( 5,            
+            tags$p("Plot of the percent relative error (100 * absolute error/computed variable value) 
+                of the computed variable.")
+          )
+        ),
+
+        fluidRow(
           column( 5, plotOutput("erspace", width = "500px", height = "500px") )
         ),
-        downloadButton(outputId = "down", label = "Save plot")       
+        
+
+        fluidRow(
+          column( 6, 
+            tags$p("Modify the default contour level, the reference point (state-of-the-art measurement values
+                marked as crosses), and the axes limits in the left panel.")
+            )
+        ),      
+
+        downloadButton(outputId = "down", label = "Save plot")
       ) #./mainPanel
 
     ), #./sidebarLayout
