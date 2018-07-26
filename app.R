@@ -580,7 +580,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
             )
           ),
 
-           column(3,
+           column(4,
             textInput(inputId = "temp",
               label = "Temperature (C)",
               value = -0.49
