@@ -18,7 +18,7 @@ ui <- navbarPage("Uncertainty propagation for the marine CO2 system",
     fluidRow(
       column(4, 
         tags$p("Choose an input pair and change their values."),
-        tags$p("Choose the output variable to be calculated specify values for each member
+        tags$p("Choose the output variable to be calculated and specify values for each member
                 of the chosen input pair as well as the corresponding salinity, temperature,
                 pressure, and total dissolved inorganic P and Si."),
         tags$p("To restore defaults, refresh the browser.")
