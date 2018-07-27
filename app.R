@@ -7,7 +7,7 @@ library(shiny)
 library(seacarb)
 
 # ui <- fluidPage(
-ui <- navbarPage("Error propagation for the marine CO2 system",
+ui <- navbarPage("Uncertainty propagation for the marine CO2 system",
   # includeCSS("style.css"),
 
   tabPanel("Error-space diagram",
@@ -17,10 +17,10 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
 
     fluidRow(
       column(4, 
-        tags$p("Choose an input pair and change their default values if desired."),
-        tags$p("Choose the output variable to be calculated based on the input 
-                values and (modifiable) values for salinity, temperature, pressure, 
-                phosphate and silicon."),
+        tags$p("Choose an input pair and change their values."),
+        tags$p("Choose the output variable to be calculated specify values for each member
+                of the chosen input pair as well as the corresponding salinity, temperature,
+                pressure, and total dissolved inorganic P and Si."),
         tags$p("To restore defaults, refresh the browser.")
 
       )
@@ -30,7 +30,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
 
     # tags$p('errors(flag, var1, var2, S=35, T=25, Patm=1, P=0, Pt=0, Sit=0, 
     #             evar1=0, evar2=0, eS=0.01, eT=0.01, ePt=0, eSit=0, 
-    #             epK=c(0.002, 0.0075, 0.015, 0.01, 0.01, 0.02, 0.02, 0.02)'),
+    #             epK=c(0.002, 0.0075, 0.015, 0.01, 0.01, 0.02, 0.02), eBt=0.02)'),
 
     sidebarLayout(
       sidebarPanel(
@@ -679,8 +679,8 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
       mainPanel(
         fluidRow(
           column( 5,
-            tags$p("Plot of the percent relative error (100 * absolute error/computed variable value) 
-                of the computed variable.")
+            tags$p("Plot of the computed variable's percent relative total uncertainty (100 * absolute uncertainty/computed variable value) 
+            as a function of input uncertatinties. The blue number near the origin is the combined uncertainty only from the constants.")
           )
         ),
 
@@ -691,8 +691,9 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
 
         fluidRow(
           column( 6, 
-            tags$p("Modify the default contour level, the reference point (state-of-the-art measurement values
-                marked as crosses), and the axes limits in the left panel.")
+            tags$p("In the left panel, you can also modify the contour levels for the calculated output variable's
+                    propagated uncertainties, the axes limits, the reference point (e.g., your measurement uncertainty
+                    that will be marked with crosses), and the uncertainties in the constants.")
             )
         ),      
 
@@ -737,7 +738,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
     fluidRow(
       column(5,
         tags$html(
-          tags$body("To quantify errors more generally and assess the potential for improvement, 
+          tags$body("To quantify uncertainties more generally and assess the potential for improvement, 
                   this application uses the errors routine from the ",
                   a("seacarb package", href="https://github.com/jamesorr/seacarb-git", 
                     target="blank"), "to construct an error-space diagram showing how 
@@ -748,7 +749,7 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
         tags$br(),
         tags$body("Based on the work published by ",
                   a("Orr et al.,", href="https://github.com/jamesorr/seacarb-git", 
-                    target="blank"), " (submitted, 2018)."
+                    target="blank"), " (submitted to Marine Chemistry, 2018)."
           )
         )
 
@@ -764,22 +765,22 @@ ui <- navbarPage("Error propagation for the marine CO2 system",
                     member of the input pair, assuming total uncertainties from the equilibrium 
                     constants given in ",
                     a("Table 1", href="https://github.com/jamesorr/seacarb-git", 
-                    target="blank"), " of the manuscript."
+                    target="blank"), " of the manuscript (the same as the defaults used here)."
           )
         )
       )
     ), #./fluidRow for FAQ1
 
-    tags$h3("Error calculation"),
+    tags$h3("Uncertainty calculation"),
     fluidRow(
       column(5,
              tags$html(
               tags$body("Estimates uncertainties in computed carbonate system variables by 
-                    propagating standard error (uncertainty) in six input variables, 
+                    propagating standard uncertainty in six input variables, 
                     including the input pair of carbonate system variables,  
-                    the two input nutrients (silicate and phosphate concentrations),  
+                    the two input nutrients (total dissolved inorganic P and Si concentrations),  
                     temperature and salinity, as well as the errors in the key dissociation 
-                    constants pK0, pK1, pK2, pKb, pKw, pKspa and pKspc.  "
+                    constants (pK0, pK1, pK2, pKb, pKw, pKspa, pKspc), and the B/Salinity ratio."
               ),
               tags$br(),
               tags$br(),
@@ -890,7 +891,8 @@ server <- function(input, output) {
   # (pK0, pK1, pK2, pKb, pKw, pKa, pKc, Bt)
   # Read these from the sidebar text boxes.
   # ------------------------------------------------
-  epKstd_orig  <- c(0.002, 0.0075,  0.015, 0.01,  0.01, 0.02, 0.02, 0.02)
+  epKstd_orig  <- c(0.002, 0.0075, 0.015, 0.01, 0.01, 0.02, 0.02)
+  eBtstd_orig  = 0.02
 
   numpts = 20 #number of pts in plotted x, y vectors
 
@@ -983,17 +985,12 @@ server <- function(input, output) {
     menu_err_epKw <- as.numeric(input$err_epKw)
     menu_err_epKspa <- as.numeric(input$err_epKspa)
     menu_err_epKspc <- as.numeric(input$err_epKspc)
-    menu_err_eBt <- as.numeric(input$err_eBt)
+    menu_err_eBt  <- as.numeric(input$err_eBt)
 
 
-
-    # does not work if menu_err_epKspc is used
-    epKstd <- c(menu_err_epK0, menu_err_epK1, menu_err_epK2, menu_err_epKb, menu_err_epKw, menu_err_epKspa, menu_err_epKspc, menu_err_eBt)
+    epKstd <- c(menu_err_epK0, menu_err_epK1, menu_err_epK2, menu_err_epKb, menu_err_epKw, menu_err_epKspa, menu_err_epKspc)
+    eBtstd = menu_err_eBt
     
-    #works
-    # epKstd <- c(menu_err_epK0, menu_err_epK1, menu_err_epK2, menu_err_epKb, menu_err_epKw, menu_err_epKspa, 0.02, menu_err_eBt)
-    # c(0.002, 0.0075, 0.015, 0.01, 0.01, 0.02, 0.02, 0.02)
-
     # Define output variable based on conditional menu selection
     conditional_outvar <- reactive({switch(
       input$flag,
@@ -1289,7 +1286,8 @@ server <- function(input, output) {
           "levels1" = levels1,
           "xlabel" = xlabel,
           "ylabel" = ylabel,
-          "epKstd" = epKstd
+          "epKstd" = epKstd,
+          "eBtstd" = eBtstd
         )
   }) #./varSet1
 
@@ -1310,6 +1308,7 @@ server <- function(input, output) {
     var1_e <- varSet1()[["var1_e"]]
     var2_e <- varSet1()[["var2_e"]]
     epKstd <- varSet1()[["epKstd"]]
+    eBtstd <- varSet1()[["eBtstd"]]
 
 
     print("Running carb function:")
@@ -1370,7 +1369,7 @@ server <- function(input, output) {
     absEt <- errors (flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp,
                     Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil, 
                     evar1=dat_evar1, evar2=dat_evar2, 
-                    eS=0, eT=0, ePt=0, eSit=0, epK=epKstd,
+                    eS=0, eT=0, ePt=0, eSit=0, epK=epKstd, eBt=eBtstd,
                     k1k2='w14', kf='dg', ks="d", pHscale="T",
                     b="u74", gas="potential", warn='no')
 
@@ -1414,13 +1413,14 @@ server <- function(input, output) {
     var1_e <- varSet1()[["var1_e"]]
     var2_e <- varSet1()[["var2_e"]]
     epKstd <- varSet1()[["epKstd"]]
+    eBtstd <- varSet1()[["eBtstd"]]
 
     # Constants-pair CURVE (propagated error from constants = that from input pair)
     # (Southern Ocean)
     print("Calculating constants-pair curve (errhalf fn):")
     errcirc <- errhalf(flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp, 
                        Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil,
-                       epK=epKstd,
+                       epK=epKstd, eBt=eBtstd,
                        k1k2='l', kf='dg', ks="d", pHscale="T", 
                        b="u74", gas="potential", warn="n")  
 
@@ -1430,7 +1430,7 @@ server <- function(input, output) {
     sigyspct <- seq(0,maxlim,by=1/redn) # in percent
     errm <- errmid(flag=menu_flag, var1=menu_var1, var2=menu_var2, S=menu_salt, T=menu_temp,
                   Patm=1, P=menu_pressure, Pt=menu_phos, Sit=menu_sil,
-                  sigyspct, epK=epKstd,
+                  sigyspct, epK=epKstd, eBt=eBtstd,
                   k1k2='l', kf='dg', ks="d", pHscale="T", 
                   b="u74", gas="potential", warn="n")
     # NB: Warning in sqrt(0.5 * (sigmay^2 - eKall^2)/dd1^2) : production de NaN
@@ -1494,7 +1494,7 @@ server <- function(input, output) {
     # Error-space diagram of relative error in CO3 for At-Ct input pair
     dim(er_outvar) <- c(length(var2_e), length(var1_e))
     
-    subtitle <-paste("Percent relative error for", menu_outvar, sep=" ")      
+    subtitle <-paste("Percent relative uncertainty for", menu_outvar, sep=" ")      
     
     za <- er_outvar
 
