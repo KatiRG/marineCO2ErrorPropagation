@@ -884,8 +884,6 @@ server <- function(input, output) {
   # Define function sources
   source("errhalf.R")
   source("errmid.R")
-  source("errors.R")
-  source("derivnum.R")
 
   # Default uncertainties in equilibrium constants 
   # (pK0, pK1, pK2, pKb, pKw, pKa, pKc, Bt)
